@@ -52,6 +52,32 @@ class dbUsuarios
             return ['error' => 'Error al registrar usuario: ' . $nombre . $email . $pass .$e->getMessage()];
         }
     }
+
+    public function authenticateUser($email, $password) {
+        // Consulta para obtener los datos del usuario por email
+        $query = "SELECT id, nombre, email, pass, tipo, estado_suscripcion FROM usuarios WHERE email = :email";
+        
+        // Usamos la conexión a la base de datos de la clase actual (asegurándonos de que sea la misma que en el método de registro)
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':email' => $email]);
+        
+        // Verificamos si encontramos un usuario
+        $user = $stmt->fetch();
+        
+        if ($user) {
+            // Si encontramos un usuario, verificamos la contraseña
+            if (password_verify($password, $user['pass'])) {
+                // Eliminamos la contraseña antes de devolver los datos
+                unset($user['pass']);
+                return $user; // Usuario autenticado correctamente
+            }
+        }
+        
+        // Si no encontramos al usuario o la contraseña es incorrecta, devolvemos false
+        return false;
+    }
+    
+    
     
 
 
