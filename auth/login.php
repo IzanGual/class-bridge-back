@@ -10,14 +10,15 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->load(); 
+
+
 // Manejo de preflight request (CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
-
-// Clave secreta para firmar el JWT (debe estar en un entorno seguro)
-define('JWT_SECRET', 'tu_clave_secreta_segura');
 
 // Instancia de la clase de acceso a datos
 $db = new dbUsuarios();
@@ -50,14 +51,12 @@ function handleLogin($db) {
             // Datos del usuario (sin contraseña)
             $payload = [
                 'iat' => time(),             // Tiempo en que se generó el token
-                'exp' => time() + 3600,      // Expira en 1 hora
-                'sub' => $user['id'],        // ID del usuario
-                'nombre' => $user['nombre'],
-                'email' => $user['email']
+                'exp' => time() + (int)$_ENV['JWT_EXPIRATION'],      // Expira en 1 hora
+                'sub' => $user['id']        // ID del usuario
             ];
 
             // Generar token JWT
-            $jwt = JWT::encode($payload, JWT_SECRET, 'HS256');
+            $jwt = JWT::encode($payload, $_ENV['JWT_SECRET'], 'HS256');
 
             $responseSuccessData = [
                 "success" => true,
