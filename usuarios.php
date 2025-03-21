@@ -2,7 +2,7 @@
 // Configuración CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 // Manejo de preflight request (CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+require 'auth/jwtHelper.php'; // Archivo con funciones de JWT
 require 'db/dbUsuarios.php'; // Archivo de conexión a la base de datos
 
 // Instancia de la clase de acceso a datos
@@ -21,7 +22,14 @@ $method = $_SERVER['REQUEST_METHOD'];
 // Manejo de la solicitud según el método HTTP
 switch ($method) {
     case 'GET':
-        handleGet($db);
+        if (!validateToken()) {
+            response(401, [
+                'success' => false,
+                'error' => 'invalidToken'
+            ]);
+        } else {
+            handleGet($db);
+        }
         break;
     case 'POST':
         handlePost($db);
@@ -40,8 +48,32 @@ switch ($method) {
  * Manejo de solicitudes GET
  */
 function handleGet($db) {
-    // Implementar lógica para obtener usuarios si es necesario
-    response(200, ['message' => 'GET request recibida']);
+    try {
+        if (isset($_GET['id'])) {
+            $user = $db->getUserById($_GET['id'] ?? null); 
+            if ($user) {
+                response(200, [
+                    'success' => true,
+                    'user' => $user
+                ]);
+            } else {
+                response(404, [
+                    'success' => false,
+                    'error' => 'Usuario no encontrado'
+                ]);
+            }
+        } else {
+            response(400, [
+                'success' => false,
+                'error' => 'Debes proporcionar un ID'
+            ]);
+        }
+    } catch (Exception $e) {
+        response(500, [
+            'success' => false,
+            'error' => 'Error al obtener el usuario: ' . $e->getMessage()
+        ]);
+    }
 }
 
 /**
@@ -59,14 +91,14 @@ function handlePost($db) {
         $response = $db->registerUser($data['nombre'], $data['email'], $data['contraseña']);
         
         if ($response === true) {
-            // Respuesta en caso de éxito
-            echo json_encode([
+            // Respuesta en caso de éxito utilizando la función `response`
+            response(200, [
                 "success" => true,
-                "message" => "Usuario creado con éxito"                
+                "message" => "Usuario creado con éxito"
             ]);
         } else {
-            // Respuesta en caso de error
-            echo json_encode([
+            // Respuesta en caso de error utilizando la función `response`
+            response(400, [
                 "success" => false,
                 "error" => $response['error']  // Extraemos el error devuelto desde la función registerUser
             ]);
@@ -74,13 +106,13 @@ function handlePost($db) {
     
     } catch (Exception $e) {
         // Respuesta en caso de una excepción inesperada
-        http_response_code(500); // Código de error 500 para error interno del servidor
-        echo json_encode([
+        response(500, [
             "success" => false,
             "error" => 'Error al procesar la solicitud: ' . $e->getMessage()
         ]);
     }
 }
+
 
 /**
  * Manejo de solicitudes PUT (Actualizar usuario)

@@ -27,6 +27,8 @@ class dbUsuarios
         $checkStmt = $this->pdo->prepare("SELECT * FROM usuarios WHERE email = :email");
         $checkStmt->execute([':email' => $email]);
         $existingUser = $checkStmt->fetch();
+
+        $tipo = "normal";
     
         if ($existingUser) {
             // Si el usuario ya existe, devolvemos un error
@@ -38,20 +40,22 @@ class dbUsuarios
     
         try {
             // Preparamos la inserción de un nuevo usuario
-            $stmt = $this->pdo->prepare("INSERT INTO usuarios (nombre, email, pass) VALUES (:nombre, :email, :pass)");
+            $stmt = $this->pdo->prepare("INSERT INTO usuarios (nombre, email, pass, tipo) VALUES (:nombre, :email, :pass, :tipo)");
             $stmt->execute([
                 ':nombre' => $nombre,
                 ':email' => $email,
-                ':pass' => $hashedPassword
+                ':pass' => $hashedPassword,
+                ':tipo' => $tipo
             ]);
-            
+    
             // Si la inserción es exitosa, retornamos true
             return true;
         } catch (PDOException $e) {
             // En caso de error, devolvemos el mensaje de error
-            return ['error' => 'Error al registrar usuario: ' . $nombre . $email . $pass .$e->getMessage()];
+            return ['error' => 'Error al registrar usuario: ' . $e->getMessage()];
         }
     }
+    
 
     public function authenticateUser($email, $password) {
         // Consulta para obtener los datos del usuario por email
@@ -78,8 +82,47 @@ class dbUsuarios
     }
     
     
+    public function getUserById($id) {
+        // Consulta para obtener los detalles del usuario por ID
+        $query = "SELECT id, nombre, email, tipo, estado_suscripcion FROM usuarios WHERE id = :id";
+        
+        // Preparamos y ejecutamos la consulta con el ID proporcionado
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':id' => $id]);
+        
+        // Obtenemos el usuario de la base de datos
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Verificamos si encontramos el usuario
+        if ($user) {
+            return $user; // Retornamos los datos del usuario
+        }
+        
+        // Si no encontramos el usuario, retornamos false
+        return false;
+    }
+
+    public function getUserType($id) { //TODO revisar funcionamiento
+        // Consulta para obtener los detalles del usuario por ID
+        $query = "SELECT tipo FROM usuarios WHERE id = :id";
+        
+        // Preparamos y ejecutamos la consulta con el ID proporcionado
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':id' => $id]);
+        
+        // Obtenemos el usuario de la base de datos
+        $type = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Verificamos si encontramos el usuario
+        if ($type) {
+            return $type; // Retornamos los datos del usuario
+        }
+        
+        // Si no encontramos el usuario, retornamos false
+        return false;
+    }
     
 
-
+   
 
 }
