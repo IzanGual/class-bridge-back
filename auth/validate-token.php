@@ -25,7 +25,7 @@ $jwt = str_replace("Bearer ", "", $headers['Authorization'] ?? '');
 
 // Verificar si hay un token en la solicitud
 if (!$jwt) {
-    response(401, [
+    response(200, [
         "success" => false,
         "error" => "missingToken"
     ]);
@@ -41,22 +41,22 @@ try {
     ]);
 
 } catch (ExpiredException $e) {
-    response(401, [
+    response(200, [
         "success" => false,
         "error" => "tokenExpired"
     ]);
 } catch (BeforeValidException $e) {
-    response(401, [
+    response(200, [
         "success" => false,
         "error" => "tokenNotYetValid"
     ]);
 } catch (SignatureInvalidException $e) {
-    response(401, [
+    response(200, [
         "success" => false,
         "error" => "invalidTokenSignature"
     ]);
 } catch (Exception $e) {
-    response(401, [
+    response(200, [
         "success" => false,
         "error" => "invalidToken"
     ]);

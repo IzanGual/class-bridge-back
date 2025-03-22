@@ -84,7 +84,7 @@ class dbUsuarios
     
     public function getUserById($id) {
         // Consulta para obtener los detalles del usuario por ID
-        $query = "SELECT id, nombre, email, tipo, estado_suscripcion FROM usuarios WHERE id = :id";
+        $query = "SELECT id, nombre, email, tipo, estado_suscripcion, img_url FROM usuarios WHERE id = :id";
         
         // Preparamos y ejecutamos la consulta con el ID proporcionado
         $stmt = $this->pdo->prepare($query);
@@ -102,25 +102,32 @@ class dbUsuarios
         return false;
     }
 
-    public function getUserType($id) { //TODO revisar funcionamiento
-        // Consulta para obtener los detalles del usuario por ID
-        $query = "SELECT tipo FROM usuarios WHERE id = :id";
+    public function updateUserImage($idUsuario, $imgUrl) {
+        // Consulta SQL para actualizar la imagen del usuario
+        $query = "UPDATE usuarios SET img_url = :img_url WHERE id = :id";
         
-        // Preparamos y ejecutamos la consulta con el ID proporcionado
-        $stmt = $this->pdo->prepare($query);
-        $stmt->execute([':id' => $id]);
-        
-        // Obtenemos el usuario de la base de datos
-        $type = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Verificamos si encontramos el usuario
-        if ($type) {
-            return $type; // Retornamos los datos del usuario
+        try {
+            // Preparamos la consulta
+            $stmt = $this->pdo->prepare($query);
+    
+            // Ejecutamos la consulta con los valores proporcionados
+            $success = $stmt->execute([
+                ':img_url' => $imgUrl,
+                ':id' => $idUsuario
+            ]);
+    
+            // Si la ejecución fue exitosa, devolvemos true, independientemente de si rowCount() es 0
+            return $success;
+    
+        } catch (PDOException $e) {
+            // Si hay un error real en la ejecución, lo registramos y devolvemos false
+            error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
+            return false;
         }
-        
-        // Si no encontramos el usuario, retornamos false
-        return false;
     }
+    
+    
+
     
 
    
