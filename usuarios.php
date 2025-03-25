@@ -45,7 +45,15 @@ switch ($method) {
         }
         break;
     case 'DELETE':
-        handleDelete($db);
+        if (!validateToken()) {
+            response(401, [
+                'success' => false,
+                'error' => 'invalidToken'
+            ]);
+        } else {
+            handleDelete($db);
+        }
+        
         break;
     default:
         response(405, ['error' => 'Método no permitido']);
@@ -87,10 +95,29 @@ function handleGet($db) {
  * Manejo de solicitudes PUT
  */
 function handlePut($db) {
-    response(200, [
-        'success' => true,
-        'user' => 'HANDLEPUT'
-    ]);
+    $data = getRequestData();
+        
+       
+        if (!isset($data['name'])) {
+            response(400, ['error' => 'Faltan parámetros']);
+        } 
+        else{
+            $userId = getUserIdFromToken();
+            $response = $db->updateUserName($userId ,$data['name']);
+
+            if($response){
+                response(200, [
+                    'success' => true,
+                    'message' => 'nameSuccessfulyUpdated'
+                ]);
+            }else{
+                response(200, [
+                    'success' => false,
+                    'error' => 'nameNotUpdated'
+                ]);
+            }
+        }
+    
 }
 
 /**
@@ -194,27 +221,73 @@ function handleImageUpload($db) {
     }
 }
 
+function handleImageDeletion($db, $userId) {
+    // Definir la URL de la imagen predeterminada
+    $defaultImageUrl = "http://localhost/classbridgeapi/uploads/profiles/000/profile.png";
+
+    // Obtener la URL de la imagen desde la BD
+    $imageUrl = $db->getUserImage($userId);
+
+    // Si la imagen no existe en la BD, devolvemos error
+    if (!$imageUrl) {
+        response(404, ['success' => false, 'error' => 'No se encontró la imagen del usuario.']);
+        return false;
+    }
+
+    // Si la imagen es la predeterminada, no la eliminamos
+    if ($imageUrl === $defaultImageUrl) {
+        response(400, ['success' => false, 'error' => 'No puedes eliminar la imagen predeterminada.']);
+        return false;
+    }
+
+    // Convertir la URL a una ruta de archivo eliminando la parte del dominio
+    $filePath = str_replace("http://localhost/classbridgeapi/", "", $imageUrl);
+
+
+    // Eliminar la imagen del servidor si existe
+    if (file_exists($filePath)) {
+        unlink($filePath);
+    }
+
+    // Actualizar la base de datos para que el usuario tenga la imagen predeterminada
+    $resetImage = $db->updateUserImage($userId, $defaultImageUrl);
+
+    if ($resetImage) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 /**
  * Manejo de solicitudes DELETE (Eliminar usuario)
  */
 function handleDelete($db) {
-    $data = getRequestData();
-    
-    if (!isset($data['id'])) {
-        response(400, ['error' => 'ID requerido']);
+    if (!isset($_GET["action"])) {
+        response(200, ['success' => false, 'error' => 'Falta el action']);
+        return;
     }
 
-    try {
-        $deleted = $db->deleteUser($data['id']);
+    if($_GET["action"] == "deleteImage"){
+        $userId = getUserIdFromToken();
+
+        // Llamamos a la función que elimina la imagen
+        $deleted = handleImageDeletion($db, $userId);
+    
         if ($deleted) {
-            response(200, ['success' => true, 'message' => 'Usuario eliminado']);
+            $newImageUrl = $db->getUserImage($userId);
+            response(200, ['success' => true, 'message' => 'Imagen eliminada correctamente.', 'imageUrl' => $newImageUrl]);
         } else {
-            response(500, ['error' => 'Error al eliminar usuario']);
+            response(200, ['success' => false, 'error' => 'Error al eliminar la imagen de la BD.']);
         }
-    } catch (Exception $e) {
-        response(500, ['error' => 'Error en la base de datos: ' . $e->getMessage()]);
+    }else{
+        response(200, ['success' => false, 'error' => 'NO VALID ACTION!!']);
+
     }
+
+
+    
 }
 
 /**
@@ -232,7 +305,7 @@ function getRequestData() {
         return $_POST;
     }
     
-    response(400, ['error' => 'Formato de datos no soportado']);
+    response(400, ['success' => false, 'error' => 'Error al recibir los datos en el seridor: Formato de datos no soportado']);
 }
 
 /**

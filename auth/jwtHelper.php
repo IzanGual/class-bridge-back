@@ -1,4 +1,5 @@
 <?php
+
 require 'vendor/autoload.php'; // Asegurar que la biblioteca JWT está incluida
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -77,7 +78,7 @@ function getUserIdFromToken() {
 
     if ($decoded) {
         // Si el token es válido, devolver el ID
-        return $decoded->id;  // Suponiendo que el JWT contiene un campo 'id'
+        return $decoded->sub;  // Suponiendo que el JWT contiene un campo 'id'
     }
 
     return false; // Si el token no es válido

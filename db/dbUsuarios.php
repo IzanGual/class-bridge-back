@@ -125,7 +125,58 @@ class dbUsuarios
             return false;
         }
     }
+
+    public function getUserImage($idUsuario) {
+        // Consulta SQL para obtener la URL de la imagen del usuario
+        $query = "SELECT img_url FROM usuarios WHERE id = :id LIMIT 1";
     
+        try {
+            // Preparamos la consulta
+            $stmt = $this->pdo->prepare($query);
+    
+            // Ejecutamos la consulta con el ID del usuario
+            $stmt->execute([':id' => $idUsuario]);
+    
+            // Obtenemos el resultado
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            // Si existe una imagen, la devolvemos; si no, devolvemos null
+            return $result ? $result['img_url'] : null;
+    
+        } catch (PDOException $e) {
+            // Si hay un error, lo registramos y devolvemos null
+            error_log("Error al obtener la imagen del usuario: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function updateUserName($idUsuario, $nombre) {
+        // Consulta SQL para actualizar la imagen del usuario
+        $query = "UPDATE usuarios SET nombre = :nombre WHERE id = :id";
+        
+        try {
+            // Preparamos la consulta
+            $stmt = $this->pdo->prepare($query);
+    
+            // Ejecutamos la consulta con los valores proporcionados
+            $success = $stmt->execute([
+                ':nombre' => $nombre,
+                ':id' => $idUsuario
+            ]);
+    
+            // Si la ejecución fue exitosa, devolvemos true, independientemente de si rowCount() es 0
+            return $success;
+    
+        } catch (PDOException $e) {
+            // Si hay un error real en la ejecución, lo registramos y devolvemos false
+            error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    
+    
+
     
 
     
