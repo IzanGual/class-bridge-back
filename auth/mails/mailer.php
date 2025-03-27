@@ -12,8 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Incluir el archivo de configuración donde está la variable global
-require 'config.php'; // Asegúrate de que este archivo esté bien incluido
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

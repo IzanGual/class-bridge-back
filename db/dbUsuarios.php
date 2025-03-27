@@ -121,7 +121,7 @@ class dbUsuarios
     
         } catch (PDOException $e) {
             // Si hay un error real en la ejecución, lo registramos y devolvemos false
-            error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
+            //error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
             return false;
         }
     }
@@ -145,7 +145,7 @@ class dbUsuarios
     
         } catch (PDOException $e) {
             // Si hay un error, lo registramos y devolvemos null
-            error_log("Error al obtener la imagen del usuario: " . $e->getMessage());
+            //error_log("Error al obtener la imagen del usuario: " . $e->getMessage());
             return null;
         }
     }
@@ -169,13 +169,35 @@ class dbUsuarios
     
         } catch (PDOException $e) {
             // Si hay un error real en la ejecución, lo registramos y devolvemos false
-            error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
+            //error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
             return false;
         }
     }
 
     
+    public function updateUserMail($idUsuario, $mail) {
+        // Consulta SQL para actualizar la imagen del usuario
+        $query = "UPDATE usuarios SET email = :email WHERE id = :id";
+        
+        try {
+            // Preparamos la consulta
+            $stmt = $this->pdo->prepare($query);
     
+            // Ejecutamos la consulta con los valores proporcionados
+            $success = $stmt->execute([
+                ':email' => $mail,
+                ':id' => $idUsuario
+            ]);
+    
+            // Si la ejecución fue exitosa, devolvemos true, independientemente de si rowCount() es 0
+            return $success;
+    
+        } catch (PDOException $e) {
+            // Si hay un error real en la ejecución, lo registramos y devolvemos false
+            //error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
+            return false;
+        }
+    }
 
     
 

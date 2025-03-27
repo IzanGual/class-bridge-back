@@ -96,13 +96,10 @@ function handleGet($db) {
  */
 function handlePut($db) {
     $data = getRequestData();
-        
+    $userId = getUserIdFromToken();
+
        
-        if (!isset($data['name'])) {
-            response(400, ['error' => 'Faltan parámetros']);
-        } 
-        else{
-            $userId = getUserIdFromToken();
+        if (isset($data['name'])) {
             $response = $db->updateUserName($userId ,$data['name']);
 
             if($response){
@@ -117,7 +114,23 @@ function handlePut($db) {
                 ]);
             }
         }
-    
+
+        if (isset($data['mail'])) {
+            $response = $db->updateUserMail($userId ,$data['mail']);
+
+            if($response){
+                response(200, [
+                    'success' => true,
+                    'message' => 'mailSuccessfulyUpdated'
+                ]);
+            }else{
+                response(200, [
+                    'success' => false,
+                    'error' => 'mailNotUpdated'
+                ]);
+            }
+        } 
+
 }
 
 /**
