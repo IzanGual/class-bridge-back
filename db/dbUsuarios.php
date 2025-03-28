@@ -28,13 +28,13 @@ class dbUsuarios
         $checkStmt->execute([':email' => $email]);
         $existingUser = $checkStmt->fetch();
 
-        $tipo = "normal";
+        
     
         if ($existingUser) {
             // Si el usuario ya existe, devolvemos un error
             return ['error' => 'emailDup'];
         }
-    
+        $tipo = "normal";
         // Encriptamos la pass antes de insertarla
         $hashedPassword = password_hash($pass, PASSWORD_BCRYPT);
     
@@ -176,28 +176,95 @@ class dbUsuarios
 
     
     public function updateUserMail($idUsuario, $mail) {
-        // Consulta SQL para actualizar la imagen del usuario
-        $query = "UPDATE usuarios SET email = :email WHERE id = :id";
-        
-        try {
-            // Preparamos la consulta
-            $stmt = $this->pdo->prepare($query);
+        // Comprobamos si el email ya existe en otro usuario
+        $checkStmt = $this->pdo->prepare("SELECT id FROM usuarios WHERE email = :email AND id != :id");
+        $checkStmt->execute([
+            ':email' => $mail,
+            ':id' => $idUsuario
+        ]);
+        $existingUser = $checkStmt->fetch();
     
-            // Ejecutamos la consulta con los valores proporcionados
+        if ($existingUser) {
+            // Si el email ya está en otro usuario, devolvemos un error
+            return ['error' => 'emailDup'];
+        }
+    
+        // Consulta SQL para actualizar el email del usuario
+        $query = "UPDATE usuarios SET email = :email WHERE id = :id";
+    
+        try {
+            $stmt = $this->pdo->prepare($query);
             $success = $stmt->execute([
                 ':email' => $mail,
                 ':id' => $idUsuario
             ]);
     
-            // Si la ejecución fue exitosa, devolvemos true, independientemente de si rowCount() es 0
             return $success;
     
         } catch (PDOException $e) {
-            // Si hay un error real en la ejecución, lo registramos y devolvemos false
-            //error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
-            return false;
+            return ['error' => 'NotPosibleToUpdateEmail'];
         }
     }
+
+    public function updateUserPass($idUsuario, $pass) {
+        // Verificamos si el usuario existe
+        $checkStmt = $this->pdo->prepare("SELECT id FROM usuarios WHERE id = :id");
+        $checkStmt->execute([':id' => $idUsuario]);
+        $existingUser = $checkStmt->fetch();
+    
+        if (!$existingUser) {
+            return ['error' => 'userNotFound'];
+        }
+    
+        // Encriptamos la nueva contraseña
+        $hashedPassword = password_hash($pass, PASSWORD_BCRYPT);
+    
+        try {
+            // Actualizamos la contraseña en la base de datos
+            $stmt = $this->pdo->prepare("UPDATE usuarios SET pass = :pass WHERE id = :id");
+            $success = $stmt->execute([
+                ':pass' => $hashedPassword,
+                ':id' => $idUsuario
+            ]);
+    
+            if ($success) {
+                return true;
+            } else {
+                return ['error' => 'updateFailed'];
+            }
+    
+        } catch (PDOException $e) {
+            return ['error' => 'Error updating password: ' . $e->getMessage()];
+        }
+    }
+
+    public function deleteUserProfile($userId) {
+        try {
+            // Verificamos si el usuario existe
+            $checkStmt = $this->pdo->prepare("SELECT id FROM usuarios WHERE id = :id");
+            $checkStmt->execute([':id' => $userId]);
+            $existingUser = $checkStmt->fetch();
+    
+            if (!$existingUser) {
+                return ['error' => 'userNotFound'];
+            }
+    
+            // Eliminamos el usuario
+            $stmt = $this->pdo->prepare("DELETE FROM usuarios WHERE id = :id");
+            $success = $stmt->execute([':id' => $userId]);
+    
+            if ($success) {
+                return true;
+            } else {
+                return ['error' => 'deleteFailed'];
+            }
+    
+        } catch (PDOException $e) {
+            return ['error' => 'Error deleting user: ' . $e->getMessage()];
+        }
+    }
+    
+    
 
     
 

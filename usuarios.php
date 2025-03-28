@@ -116,20 +116,40 @@ function handlePut($db) {
         }
 
         if (isset($data['mail'])) {
-            $response = $db->updateUserMail($userId ,$data['mail']);
-
-            if($response){
+            $response = $db->updateUserMail($userId, $data['mail']);
+        
+            // Si la respuesta es un array con error, devolvemos error 400
+            if (is_array($response) && isset($response['error'])) {
+                response(200, [
+                    "success" => false,
+                    "error" => $response['error']
+                ]);
+            } else {
+                // Si no hay error, la actualización fue exitosa
                 response(200, [
                     'success' => true,
-                    'message' => 'mailSuccessfulyUpdated'
-                ]);
-            }else{
-                response(200, [
-                    'success' => false,
-                    'error' => 'mailNotUpdated'
+                    'message' => 'mailSuccessfullyUpdated'
                 ]);
             }
-        } 
+        }
+
+        if (isset($data['pass'])) {
+            $response = $db->updateUserPass($userId ,$data['pass']);
+
+            if (is_array($response) && isset($response['error'])) {
+                response(200, [
+                    "success" => false,
+                    "error" => $response['error']
+                ]);
+            } else {
+                // Si no hay error, la actualización fue exitosa
+                response(200, [
+                    'success' => true,
+                    'message' => 'passSuccessfullyUpdated'
+                ]);
+            }
+        }
+        
 
 }
 
@@ -157,7 +177,7 @@ function handlePost($db) {
                     ]);
                 } else {
                     // Respuesta en caso de error utilizando la función `response`
-                    response(400, [
+                    response(200, [
                         "success" => false,
                         "error" => $response['error']  // Extraemos el error devuelto desde la función registerUser
                     ]);
@@ -173,6 +193,46 @@ function handlePost($db) {
         }
     }
 }
+
+
+/**
+ * Manejo de solicitudes DELETE (Eliminar usuario)
+ */
+function handleDelete($db) {
+    if (!isset($_GET["action"])) {
+        response(200, ['success' => false, 'error' => 'Falta el action']);
+        return;
+    }
+
+    $userId = getUserIdFromToken();
+
+    if($_GET["action"] == "deleteImage"){
+
+        // Llamamos a la función que elimina la imagen
+        $deleted = handleImageDeletion($db, $userId);
+    
+        if ($deleted) {
+            $newImageUrl = $db->getUserImage($userId);
+            response(200, ['success' => true, 'message' => 'Imagen eliminada correctamente.', 'imageUrl' => $newImageUrl]);
+        } else {
+            response(200, ['success' => false, 'error' => 'Error al eliminar la imagen de la BD.']);
+        }
+    }else if($_GET["action"] == "deleteUserProfile"){
+
+        $deleted =  $db->deleteUserProfile($userId);
+        if ($deleted) {
+            response(200, ['success' => true, 'message' => 'Prifile succesfully deleted']);
+        } else {
+            response(200, ['success' => false, 'error' => $response['error']]);
+        }
+
+    }
+    else{
+        response(200, ['success' => false, 'error' => 'NO VALID ACTION!!']);
+    }
+
+}
+
 
 /**
  * Manejo de la subida de imágenes
@@ -272,36 +332,6 @@ function handleImageDeletion($db, $userId) {
     }
 }
 
-
-/**
- * Manejo de solicitudes DELETE (Eliminar usuario)
- */
-function handleDelete($db) {
-    if (!isset($_GET["action"])) {
-        response(200, ['success' => false, 'error' => 'Falta el action']);
-        return;
-    }
-
-    if($_GET["action"] == "deleteImage"){
-        $userId = getUserIdFromToken();
-
-        // Llamamos a la función que elimina la imagen
-        $deleted = handleImageDeletion($db, $userId);
-    
-        if ($deleted) {
-            $newImageUrl = $db->getUserImage($userId);
-            response(200, ['success' => true, 'message' => 'Imagen eliminada correctamente.', 'imageUrl' => $newImageUrl]);
-        } else {
-            response(200, ['success' => false, 'error' => 'Error al eliminar la imagen de la BD.']);
-        }
-    }else{
-        response(200, ['success' => false, 'error' => 'NO VALID ACTION!!']);
-
-    }
-
-
-    
-}
 
 /**
  * Obtiene los datos de la solicitud en JSON, `x-www-form-urlencoded` o `multipart/form-data`
