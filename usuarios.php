@@ -12,9 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require 'auth/jwtHelper.php'; // Archivo con funciones de JWT
 require 'db/dbUsuarios.php'; // Archivo de conexión a la base de datos
+require 'db/dbAulas.php'; // Archivo de conexión a la base de datos
+require 'db/dbPagos.php'; // Archivo de conexión a la base de datos
+
+
 
 // Instancia de la clase de acceso a datos
 $db = new dbUsuarios();
+
 
 // Obtener el método HTTP
 $method = $_SERVER['REQUEST_METHOD'];
@@ -98,7 +103,14 @@ function handlePut($db) {
     $data = getRequestData();
     $userId = getUserIdFromToken();
 
-       
+        if (empty($data)) {
+            response(400, [
+                'success' => false,
+                'error' => 'noDataProvided'
+            ]);
+        return; 
+        }
+
         if (isset($data['name'])) {
             $response = $db->updateUserName($userId ,$data['name']);
 
@@ -149,6 +161,44 @@ function handlePut($db) {
                 ]);
             }
         }
+
+        if (isset($data['precio']) && isset($data['classroomName'])) {
+            $dbAulas = new dbAulas();
+            $dbPagos = new dbPagos();
+        
+            $response = $dbAulas->insertAula($data['classroomName'], $userId);
+        
+            if (is_array($response) && isset($response['error'])) {
+                response(200, [
+                    'success' => false,
+                    'error' => $response['error']
+                ]);
+            } else {
+                $response = $db->updateUserRoleToTeacher($userId);
+        
+                if (is_array($response) && isset($response['error'])) {
+                    response(200, [
+                        'success' => false,
+                        'error' => $response['error']
+                    ]);
+                } else {
+                    $response = $dbPagos->insertPago($userId, $data['precio']);
+        
+                    if (is_array($response) && isset($response['error'])) {
+                        response(200, [
+                            'success' => false,
+                            'error' => $response['error']
+                        ]);
+                    } else {
+                        response(200, [
+                            'success' => true,
+                            'message' => 'userCorrectlyUpdated'
+                        ]);
+                    }
+                }
+            }
+        }
+        
         
 
 }

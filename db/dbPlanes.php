@@ -31,6 +31,21 @@ class dbPlanes
     }
 }
 
+public function getPlanById($id)
+{
+    try {
+        $stmt = $this->pdo->prepare('SELECT * FROM planes_servicio WHERE id = :id');
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC); // Usamos fetch() en lugar de fetchAll() ya que esperamos un solo resultado
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+
+
+
 
 
 }

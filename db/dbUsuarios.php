@@ -264,6 +264,33 @@ class dbUsuarios
         }
     }
     
+    public function updateUserRoleToTeacher($idUsuario) {
+        try {
+            // Definir los valores fijos
+            $Rol = "profesor";
+            $estadoSuscripcion = "activo";
+    
+            // Consulta SQL para actualizar el rol y estado de suscripción
+            $query = "UPDATE usuarios SET tipo = :tipo, estado_suscripcion = :estado WHERE id = :id";
+            
+            // Preparamos la consulta
+            $stmt = $this->pdo->prepare($query);
+    
+            // Ejecutamos la consulta con los valores proporcionados
+            $success = $stmt->execute([
+                ':tipo' => $Rol,
+                ':estado' => $estadoSuscripcion,
+                ':id' => $idUsuario
+            ]);
+    
+            return $success; // Devuelve true si la actualización fue exitosa
+    
+        } catch (PDOException $e) {
+            return ['error' => 'Error al actualizar el rol: ' . $e->getMessage()];
+        }
+    }
+    
+    
     
 
     

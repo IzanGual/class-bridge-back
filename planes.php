@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require 'db/dbPlanes.php'; // Archivo de conexión a la base de datos
+require 'auth/jwtHelper.php'; // Archivo con funciones de JWT
 
 // Instancia de la clase de acceso a datos
 $db = new dbPlanes();
@@ -42,10 +43,37 @@ switch ($method) {
  */
 function handleGet($db) {
     try {
-        $planes = $db->getAllPlanes(); 
-        response(200, $planes); 
+        if (isset($_GET['id'])) {
+            if (!validateToken()) {
+                response(401, [
+                    'success' => false,
+                    'error' => 'invalidToken'
+                ]);
+            } else {
+                $plan = $db->getPlanById($_GET['id']); 
+                if (!$plan) {
+                    response(404, [
+                        'success' => false,
+                        'error' => 'Usuario no encontrado'
+                    ]);
+                } else {
+                    response(200, [
+                        'success' => true,
+                        'plan' => $plan
+                    ]);
+                }
+            }
+
+            
+        } else {
+            $planes = $db->getAllPlanes(); 
+            response(200, $planes); 
+        }
     } catch (Exception $e) {
-        response(500, ['error' => 'Error al obtener los planes', 'details' => $e->getMessage()]);
+        response(500, [
+            'success' => false,
+            'error' => 'Error al obtener el usuario: ' . $e->getMessage()
+        ]);
     }
 }
 
