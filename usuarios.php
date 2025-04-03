@@ -276,10 +276,25 @@ function handleDelete($db) {
             response(200, ['success' => false, 'error' => $response['error']]);
         }
 
-    }
-    else{
-        response(200, ['success' => false, 'error' => 'NO VALID ACTION!!']);
-    }
+    }else if($_GET["action"] == "cancelSuscription"){
+        $dbAulas = new dbAulas();
+    
+        $response = $dbAulas->deleteAulaByProfesor($userId);
+
+        if($response){
+            $response = $db->degradeUserRoleToCanceled($userId);
+            if($response){
+                response(200, ['success' => true, 'message' => 'Prifile succesfully degraded  to normal']);
+            }
+            else{
+                response(200, ['success' => false, 'error' => 'Error in the DB']);
+            }
+        }else{
+            response(200, ['success' => false, 'error' => 'Error in the DB']);
+
+        }
+
+}
 
 }
 

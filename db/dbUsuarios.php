@@ -289,6 +289,34 @@ class dbUsuarios
             return ['error' => 'Error al actualizar el rol: ' . $e->getMessage()];
         }
     }
+
+    public function degradeUserRoleToCanceled($idUsuario) {
+        try {
+            // Definir los valores fijos
+            $Rol = "normal";
+            $estadoSuscripcion = "cancelado";
+    
+            // Consulta SQL para actualizar el rol y estado de suscripción
+            $query = "UPDATE usuarios SET tipo = :tipo, estado_suscripcion = :estado WHERE id = :id";
+            
+            // Preparamos la consulta
+            $stmt = $this->pdo->prepare($query);
+    
+            // Ejecutamos la consulta con los valores proporcionados
+            $success = $stmt->execute([
+                ':tipo' => $Rol,
+                ':estado' => $estadoSuscripcion,
+                ':id' => $idUsuario
+            ]);
+    
+            return $success; // Devuelve true si la actualización fue exitosa
+    
+        } catch (PDOException $e) {
+            return ['error' => 'Error al actualizar el rol: ' . $e->getMessage()];
+        }
+    }
+
+    
     
     
     

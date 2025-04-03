@@ -20,6 +20,17 @@ class dbAulas
         }
     }
 
+    public function getAllAulas()
+{
+    try {
+        $stmt = $this->pdo->prepare('SELECT * FROM aulas');
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
     // Método para insertar una nueva aula
     public function insertAula($nombre, $profesor_id)
 {
@@ -69,4 +80,32 @@ class dbAulas
             return false;
         }
     }
+
+    // Método para obtener un aula por su ID
+public function getAulaById($id)
+{
+    try {
+        // Preparamos la consulta SQL para obtener el aula por su ID
+        $stmt = $this->pdo->prepare("SELECT * FROM aulas WHERE profesor_id = :id");
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        
+        // Ejecutamos la consulta
+        $stmt->execute();
+        
+        // Verificamos si encontramos el aula
+        $aula = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Si encontramos el aula, la retornamos
+        if ($aula) {
+            return $aula;
+        }
+        
+        // Si no encontramos el aula, retornamos false
+        return false;
+    } catch (PDOException $e) {
+        // Si hay un error en la consulta o conexión, retornamos false
+        return false;
+    }
+}
+
 }

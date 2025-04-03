@@ -19,6 +19,9 @@ use PHPMailer\PHPMailer\Exception;
 require '../vendor/autoload.php'; // Si usaste Composer
 require '../../auth/jwtHelper.php'; // Archivo con funciones de JWT
 require '../../db/dbCodigos-Verificacion.php'; // Archivo con funciones de JWT
+require '../../db/dbUsuarios.php'; 
+require '../../db/dbAulas.php'; 
+
 
 
 // Comprobamos si el token de sesión es válido (si corresponde)
@@ -30,18 +33,147 @@ if (!validateToken()) {
 } else {
     // Verificar el parámetro 'action' en el POST
     $data = getRequestData();
-    if (isset($data['action'])) {
-        if ($data['action'] === 'sendCode') {
-            sendCode();
-        } elseif ($data['action'] === 'verifyCode') {
-            verifyCode();
-        } else {
-            response(400, ['success' => false, 'error' => 'Acción no válida']);
-        }
-    } else {
+    if (!isset($data['action'])) {
         response(400, ['success' => false, 'error' => 'Falta el parámetro action']);
+        exit;
+    }
+    
+    switch ($data['action']) {
+        case 'sendCode':
+            sendCode();
+            break;
+        
+        case 'verifyCode':
+            verifyCode();
+            break;
+
+        case 'sendInfoMail':
+            sendInfoMail();
+            break;
+        
+        default:
+            response(400, ['success' => false, 'error' => 'Acción no válida']);
+    }
+    
+}
+
+
+function sendInfoMail() {
+    $dbAulas = new dbAulas();
+    $db = new dbUsuarios();
+    $userMail = "";
+    
+    $id_usuario = getUserIdFromToken(); // Obtener el ID del usuario de la solicitud
+    $userInfo = $db->getUserById($id_usuario);
+    $aula = $dbAulas->getAulaById($id_usuario);
+    $aulaName = $aula['nombre'];
+
+    $AulaUrl = "http://localhost:3000/bridgeto/" . $aulaName; // URL del aula
+
+    if (!$userInfo) {
+        response(200, ['error' => 'Error al obtener los datos del usuario.']);
+        return;
+    } else {
+        $userMail = $userInfo['email']; // Extraemos el email del usuario
+    }
+
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->CharSet = 'UTF-8';  // Asegúrate de colocar esto primero
+        $mail->isSMTP();
+        $mail->Host = 'smtp-relay.brevo.com'; // Host SMTP de Brevo
+        $mail->SMTPAuth = true;
+        $mail->Username = '851f2e001@smtp-brevo.com'; // El correo asociado a tu cuenta Brevo
+        $mail->Password = $_ENV['SMTP_KEY'];
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // O SSL si usas el puerto 465
+        $mail->Port = 587; // Puerto de Brevo
+
+        // Configuración del correo
+        $mail->setFrom('iesvda.izamar@gmail.com', 'class-bridge'); 
+        $mail->addAddress($userMail, 'user'); 
+        $mail->Subject = '¡Tu Aula ya está lista para ser administrada!';
+        $mail->addEmbeddedImage('imgs/text-logo.png', 'logoImg', 'text-logo.png');
+        $mail->Body = '
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        color: #333333;
+                        background-color: #f9f9f9;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .email-container {
+                        width: 100%;
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        background-color: #ffffff;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                    }
+                    .email-header {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .email-header img {
+                        max-width: 180px;
+                        border-radius: 10px;
+                    }
+                    .email-body {
+                        padding: 20px;
+                        text-align: center;
+                    }
+                    .verification-code {
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #feb47b;
+                        background-color: #f1f1f1;
+                        padding: 10px;
+                        border-radius: 5px;
+                    }
+                    .footer {
+                        text-align: center;
+                        margin-top: 20px;
+                        font-size: 12px;
+                        color: #777777;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="email-header">
+                        <img src="cid:logoImg" alt="Logo Class-Bridge">
+                    </div>
+                    <div class="email-body">
+                        <h2>¡Hola, '.$userInfo['nombre'].'!</h2>
+                        <p>¡Muchas gracias por confiar en <strong>Class-Bridge</strong>!</p>
+                        <p>Tu aula "<strong>'.$aulaName.'</strong>" ya está lista para ser administrada.</p>
+                        <p>Puedes acceder a tu aula desde el siguiente enlace:</p>
+                        <p><a href="'.$AulaUrl.'" target="_blank">'.$AulaUrl.'</a></p>
+                        <p>¡Estamos muy emocionados de que empieces a crear tus primeros alumnos y cursos!</p>
+                    </div>
+                    <div class="footer">
+                        <p>Si no solicitaste este correo, por favor ignóralo.</p>
+                        <p>&copy; '.date('Y').' Class-Bridge. Todos los derechos reservados.</p>
+                    </div>
+                </div>
+            </body>
+            </html>';
+
+        $mail->isHTML(true);
+
+        // Enviar el correo
+        $mail->send();
+        response(200, ['success' => true, 'message' => 'Correo enviado con éxito.']);
+
+    } catch (Exception $e) {
+        response(200, ['success' => false, 'error' => 'El correo no se ha podido enviar.']);
     }
 }
+
 
 
 // Función para enviar el código de verificación
