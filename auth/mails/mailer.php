@@ -67,8 +67,8 @@ function sendInfoMail() {
     $userInfo = $db->getUserById($id_usuario);
     $aula = $dbAulas->getAulaById($id_usuario);
     $aulaName = $aula['nombre'];
-
-    $AulaUrl = "http://localhost:3000/bridgeto/" . $aulaName; // URL del aula
+    $ipServer = gethostbyname(gethostname()); // Obtener la IP del servidor
+    $AulaUrl = "http://$ipServer:3000/bridgeto/" . $aulaName; // URL del aula
 
     if (!$userInfo) {
         response(200, ['error' => 'Error al obtener los datos del usuario.']);

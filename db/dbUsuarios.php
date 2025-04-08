@@ -316,6 +316,33 @@ class dbUsuarios
         }
     }
 
+
+    
+    public function updateIgmgURLWithRealIP() {
+        try {
+            // Obtener la IP del servidor usando gethostbyname() para asegurarnos de que sea IPv4
+            $ipServidor = gethostbyname(gethostname());
+    
+            // Nueva URL con la IP del servidor
+            $nuevaImgUrl = "http://$ipServidor/classbridgeapi/uploads/profiles/000/profile.png";
+    
+            // Consulta para actualizar todos los usuarios
+            $query = "UPDATE usuarios SET img_url = :nueva_url";
+    
+            // Preparar y ejecutar la consulta
+            $stmt = $this->pdo->prepare($query);
+            $success = $stmt->execute([
+                ':nueva_url' => $nuevaImgUrl
+            ]);
+    
+            return $success;
+    
+        } catch (PDOException $e) {
+            return ['error' => 'Error al actualizar img_url: ' . $e->getMessage()];
+        }
+    }
+    
+    
     
     
     
