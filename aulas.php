@@ -40,19 +40,43 @@ switch ($method) {
  * Manejo de solicitudes GET
  */
 function handleGet($db) {
-    $aulas = $db->getAllAulas(); 
-                if (!$aulas) {
-                    response(200, [
-                        'success' => false,
-                        'error' => 'Usuario no encontrado'
-                    ]);
-                } else {
-                    response(200, [
-                        'success' => true,
-                        'aulas' => $aulas
-                    ]);
+    try {
+        if (isset($_GET['id'])) {
+            $aula = $db->getAulaById($_GET['id']); 
+            if (!$aula) {
+                response(200, [
+                    'success' => false,
+                    'error' => 'Aula no encontrada'
+                ]);
+            } else {
+                response(200, [
+                    'success' => true,
+                    'aula' => $aula
+                ]);
+            }
+        } else {
+            $aulas = $db->getAllAulas(); 
+            if (!$aulas) {
+                response(200, [
+                    'success' => false,
+                    'error' => 'Aulas no encontradas'
+                ]);
+            } else {
+                response(200, [
+                    'success' => true,
+                    'aulas' => $aulas
+                ]);
+            }
+        }
+    } catch (Exception $e) {
+        response(200, [
+            'success' => false,
+            'error' => 'Error al obtener el usuario: ' . $e->getMessage()
+        ]);
+    }
 }
-}
+
+
 
 /**
  * Manejo de solicitudes POST (Registro de usuario)

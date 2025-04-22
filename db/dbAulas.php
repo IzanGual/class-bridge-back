@@ -86,7 +86,7 @@ public function getAulaById($id)
 {
     try {
         // Preparamos la consulta SQL para obtener el aula por su ID
-        $stmt = $this->pdo->prepare("SELECT * FROM aulas WHERE profesor_id = :id");
+        $stmt = $this->pdo->prepare("SELECT * FROM aulas WHERE id = :id");
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         
         // Ejecutamos la consulta
@@ -107,5 +107,35 @@ public function getAulaById($id)
         return false;
     }
 }
+
+public function isTheTeacher($aulaId, $teacherId) 
+{
+    try {
+        // Preparamos la consulta SQL para obtener el aula por su ID y comprobar el profesor
+        $stmt = $this->pdo->prepare("SELECT profesor_id FROM aulas WHERE id = :id");
+        $stmt->bindParam(':id', $aulaId, PDO::PARAM_INT); // Usamos el parámetro aulaId
+
+        // Ejecutamos la consulta
+        $stmt->execute();
+
+        // Verificamos si encontramos el aula
+        $aula = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Si encontramos el aula, comprobamos si el profesor coincide
+        if ($aula) {
+            // Comparar el profesor_id del aula con el teacherId proporcionado
+            if ($aula['profesor_id'] == $teacherId) {
+                return true; // El usuario es el profesor del aula
+            }
+        }
+
+        // Si no encontramos el aula o los ids no coinciden, retornamos false
+        return false;
+    } catch (PDOException $e) {
+        // Si hay un error en la consulta o conexión, retornamos false
+        return false;
+    }
+}
+
 
 }

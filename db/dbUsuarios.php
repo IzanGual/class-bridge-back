@@ -80,6 +80,29 @@ class dbUsuarios
         // Si no encontramos al usuario o la contraseña es incorrecta, devolvemos false
         return false;
     }
+
+    public function authenticateUserClass($aulaID, $email) {
+        // Consulta para obtener el classId del usuario por email
+        $query = "SELECT aulaId FROM usuarios WHERE email = :email";
+        
+        // Usamos la conexión a la base de datos de la clase actual
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':email' => $email]);
+        
+        // Verificamos si encontramos un usuario
+        $user = $stmt->fetch();
+        
+        if ($user) {
+            // Si el classId del usuario coincide con el aulaID proporcionado
+            if ($user['aulaId'] == $aulaID) {
+                return true; // Coincide
+            }
+        }
+        
+        // Si no hay coincidencia, devolvemos false
+        return false;
+    }
+    
     
     
     public function getUserById($id) {

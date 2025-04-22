@@ -273,7 +273,7 @@ function sendCode() {
                             <div class="verification-code">
                                 '.$verificationCode.'  <!-- Insertar el código generado -->
                             </div>
-                            <p>Usa este c&oacute;digo para completar tu registro en <strong>Class-Bridge</strong>.</p>
+                            <p>Usa este c&oacute;digo para completar la verificaci&oacute;n en <strong>Class-Bridge</strong>.</p>
                         </div>
                         <div class="footer">
                             <p>Si no solicitaste este correo, por favor ign&oacute;ralo.</p>
