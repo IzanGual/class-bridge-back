@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Apr 02, 2025 at 02:39 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 25-04-2025 a las 21:27:52
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `classbridge`
+-- Base de datos: `classbridge`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `aulas`
+-- Estructura de tabla para la tabla `aulas`
 --
 
 CREATE TABLE `aulas` (
@@ -34,18 +34,18 @@ CREATE TABLE `aulas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `aulas`
+-- Volcado de datos para la tabla `aulas`
 --
 
 INSERT INTO `aulas` (`id`, `nombre`, `profesor_id`) VALUES
 (1, 'Matemáticas Avanzadas', 1),
 (2, 'Historia Universal', 2),
-(4, 'hueos', 6);
+(25, 'izan', 7);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `calendario`
+-- Estructura de tabla para la tabla `calendario`
 --
 
 CREATE TABLE `calendario` (
@@ -57,7 +57,7 @@ CREATE TABLE `calendario` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `calendario`
+-- Volcado de datos para la tabla `calendario`
 --
 
 INSERT INTO `calendario` (`id`, `profesor_id`, `alumno_id`, `curso_id`, `fecha`) VALUES
@@ -67,7 +67,7 @@ INSERT INTO `calendario` (`id`, `profesor_id`, `alumno_id`, `curso_id`, `fecha`)
 -- --------------------------------------------------------
 
 --
--- Table structure for table `categorias`
+-- Estructura de tabla para la tabla `categorias`
 --
 
 CREATE TABLE `categorias` (
@@ -77,7 +77,7 @@ CREATE TABLE `categorias` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `categorias`
+-- Volcado de datos para la tabla `categorias`
 --
 
 INSERT INTO `categorias` (`id`, `nombre`, `curso_id`) VALUES
@@ -87,7 +87,7 @@ INSERT INTO `categorias` (`id`, `nombre`, `curso_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `codigos_verificacion`
+-- Estructura de tabla para la tabla `codigos_verificacion`
 --
 
 CREATE TABLE `codigos_verificacion` (
@@ -99,7 +99,7 @@ CREATE TABLE `codigos_verificacion` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `cursos`
+-- Estructura de tabla para la tabla `cursos`
 --
 
 CREATE TABLE `cursos` (
@@ -109,7 +109,7 @@ CREATE TABLE `cursos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `cursos`
+-- Volcado de datos para la tabla `cursos`
 --
 
 INSERT INTO `cursos` (`id`, `nombre`, `aula_id`) VALUES
@@ -119,7 +119,7 @@ INSERT INTO `cursos` (`id`, `nombre`, `aula_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `documentos`
+-- Estructura de tabla para la tabla `documentos`
 --
 
 CREATE TABLE `documentos` (
@@ -130,7 +130,7 @@ CREATE TABLE `documentos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `documentos`
+-- Volcado de datos para la tabla `documentos`
 --
 
 INSERT INTO `documentos` (`id`, `nombre`, `url`, `subcategoria_id`) VALUES
@@ -140,7 +140,7 @@ INSERT INTO `documentos` (`id`, `nombre`, `url`, `subcategoria_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `entregas`
+-- Estructura de tabla para la tabla `entregas`
 --
 
 CREATE TABLE `entregas` (
@@ -152,7 +152,7 @@ CREATE TABLE `entregas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `entregas`
+-- Volcado de datos para la tabla `entregas`
 --
 
 INSERT INTO `entregas` (`id`, `alumno_id`, `curso_id`, `archivo_url`, `nota`) VALUES
@@ -162,7 +162,7 @@ INSERT INTO `entregas` (`id`, `alumno_id`, `curso_id`, `archivo_url`, `nota`) VA
 -- --------------------------------------------------------
 
 --
--- Table structure for table `pagos`
+-- Estructura de tabla para la tabla `pagos`
 --
 
 CREATE TABLE `pagos` (
@@ -174,26 +174,38 @@ CREATE TABLE `pagos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `pagos`
+-- Volcado de datos para la tabla `pagos`
 --
 
 INSERT INTO `pagos` (`id`, `usuario_id`, `monto`, `metodo_pago`, `estado`) VALUES
 (1, 1, 49.99, 'Tarjeta de Crédito', 'completado'),
 (2, 2, 49.99, 'PayPal', 'completado'),
-(3, 6, 100.50, 'Tarjeta de credito', 'completado'),
-(4, 6, 100.50, 'Tarjeta de credito', 'completado'),
-(5, 6, 29.99, 'Tarjeta de credito', 'completado'),
-(6, 6, 29.99, 'Tarjeta de credito', 'completado'),
-(7, 6, 29.99, 'Tarjeta de credito', 'completado'),
-(8, 6, 29.99, 'Tarjeta de credito', 'completado'),
-(12, 6, 100.50, 'Tarjeta de credito', 'completado'),
-(13, 6, 100.50, 'Tarjeta de credito', 'completado'),
-(14, 6, 100.50, 'Tarjeta de credito', 'completado');
+(15, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(16, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(17, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(18, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(19, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(20, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(21, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(22, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(23, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(24, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(25, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(26, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(27, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(28, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(29, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(30, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(31, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(32, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(33, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(34, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(35, 7, 29.99, 'Tarjeta de credito', 'completado');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `planes_servicio`
+-- Estructura de tabla para la tabla `planes_servicio`
 --
 
 CREATE TABLE `planes_servicio` (
@@ -205,7 +217,7 @@ CREATE TABLE `planes_servicio` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `planes_servicio`
+-- Volcado de datos para la tabla `planes_servicio`
 --
 
 INSERT INTO `planes_servicio` (`id`, `nombre`, `descripcion`, `beneficios`, `precio`) VALUES
@@ -216,7 +228,7 @@ INSERT INTO `planes_servicio` (`id`, `nombre`, `descripcion`, `beneficios`, `pre
 -- --------------------------------------------------------
 
 --
--- Table structure for table `subcategorias`
+-- Estructura de tabla para la tabla `subcategorias`
 --
 
 CREATE TABLE `subcategorias` (
@@ -226,7 +238,7 @@ CREATE TABLE `subcategorias` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `subcategorias`
+-- Volcado de datos para la tabla `subcategorias`
 --
 
 INSERT INTO `subcategorias` (`id`, `nombre`, `categoria_id`) VALUES
@@ -236,7 +248,7 @@ INSERT INTO `subcategorias` (`id`, `nombre`, `categoria_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `usuarios`
+-- Estructura de tabla para la tabla `usuarios`
 --
 
 CREATE TABLE `usuarios` (
@@ -246,24 +258,25 @@ CREATE TABLE `usuarios` (
   `pass` varchar(255) NOT NULL,
   `tipo` enum('profesor','alumno','normal') NOT NULL,
   `estado_suscripcion` enum('activo','pendiente','cancelado') DEFAULT 'pendiente',
-  `img_url` varchar(255) DEFAULT 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png'
+  `img_url` varchar(255) DEFAULT 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png',
+  `aulaId` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `usuarios`
+-- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nombre`, `email`, `pass`, `tipo`, `estado_suscripcion`, `img_url`) VALUES
-(1, 'Juan Pérez', 'juanperez@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'profesor', 'activo', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png'),
-(2, 'María López', 'marialopez@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'profesor', 'activo', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png'),
-(3, 'Carlos García', 'carlosgarcia@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'alumno', 'activo', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png'),
-(4, 'Ana Martínez', 'anamartinez@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'alumno', 'activo', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png'),
-(6, 'izanGual', 'iesvda.izamar@gmail.com', '$2y$10$yJL.xveUf0N/H1gASXWEpOE5glbybGZYLdVFxwvmc45xA3km63A3a', 'profesor', 'activo', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png');
+INSERT INTO `usuarios` (`id`, `nombre`, `email`, `pass`, `tipo`, `estado_suscripcion`, `img_url`, `aulaId`) VALUES
+(1, 'Juan Pérez', 'juanperez@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'profesor', 'activo', 'http://192.168.1.138/classbridgeapi/uploads/profiles/000/profile.png', NULL),
+(2, 'María López', 'marialopez@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'profesor', 'activo', 'http://192.168.1.138/classbridgeapi/uploads/profiles/000/profile.png', NULL),
+(3, 'Carlos García', 'c@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'profesor', 'activo', 'http://192.168.1.138/classbridgeapi/uploads/profiles/000/profile.png', 1),
+(4, 'Ana Martínez', 'a@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'alumno', 'activo', 'http://192.168.1.138/classbridgeapi/uploads/profiles/000/profile.png', 25),
+(7, 'izangual', 'iesvda.izamar@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'profesor', 'activo', 'http://192.168.1.138/classbridgeapi/uploads/profiles/000/profile.png', 25);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `usuarios_cursos`
+-- Estructura de tabla para la tabla `usuarios_cursos`
 --
 
 CREATE TABLE `usuarios_cursos` (
@@ -273,7 +286,7 @@ CREATE TABLE `usuarios_cursos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `usuarios_cursos`
+-- Volcado de datos para la tabla `usuarios_cursos`
 --
 
 INSERT INTO `usuarios_cursos` (`id`, `usuario_id`, `curso_id`) VALUES
@@ -281,11 +294,11 @@ INSERT INTO `usuarios_cursos` (`id`, `usuario_id`, `curso_id`) VALUES
 (2, 4, 2);
 
 --
--- Indexes for dumped tables
+-- Índices para tablas volcadas
 --
 
 --
--- Indexes for table `aulas`
+-- Indices de la tabla `aulas`
 --
 ALTER TABLE `aulas`
   ADD PRIMARY KEY (`id`),
@@ -293,7 +306,7 @@ ALTER TABLE `aulas`
   ADD KEY `profesor_id` (`profesor_id`);
 
 --
--- Indexes for table `calendario`
+-- Indices de la tabla `calendario`
 --
 ALTER TABLE `calendario`
   ADD PRIMARY KEY (`id`),
@@ -302,35 +315,35 @@ ALTER TABLE `calendario`
   ADD KEY `curso_id` (`curso_id`);
 
 --
--- Indexes for table `categorias`
+-- Indices de la tabla `categorias`
 --
 ALTER TABLE `categorias`
   ADD PRIMARY KEY (`id`),
   ADD KEY `curso_id` (`curso_id`);
 
 --
--- Indexes for table `codigos_verificacion`
+-- Indices de la tabla `codigos_verificacion`
 --
 ALTER TABLE `codigos_verificacion`
   ADD PRIMARY KEY (`id_usuario`),
   ADD UNIQUE KEY `codigo_verificacion_unique` (`codigo_verificacion`);
 
 --
--- Indexes for table `cursos`
+-- Indices de la tabla `cursos`
 --
 ALTER TABLE `cursos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `aula_id` (`aula_id`);
 
 --
--- Indexes for table `documentos`
+-- Indices de la tabla `documentos`
 --
 ALTER TABLE `documentos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `subcategoria_id` (`subcategoria_id`);
 
 --
--- Indexes for table `entregas`
+-- Indices de la tabla `entregas`
 --
 ALTER TABLE `entregas`
   ADD PRIMARY KEY (`id`),
@@ -338,34 +351,35 @@ ALTER TABLE `entregas`
   ADD KEY `curso_id` (`curso_id`);
 
 --
--- Indexes for table `pagos`
+-- Indices de la tabla `pagos`
 --
 ALTER TABLE `pagos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `usuario_id` (`usuario_id`);
 
 --
--- Indexes for table `planes_servicio`
+-- Indices de la tabla `planes_servicio`
 --
 ALTER TABLE `planes_servicio`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `subcategorias`
+-- Indices de la tabla `subcategorias`
 --
 ALTER TABLE `subcategorias`
   ADD PRIMARY KEY (`id`),
   ADD KEY `categoria_id` (`categoria_id`);
 
 --
--- Indexes for table `usuarios`
+-- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `fk_aula` (`aulaId`);
 
 --
--- Indexes for table `usuarios_cursos`
+-- Indices de la tabla `usuarios_cursos`
 --
 ALTER TABLE `usuarios_cursos`
   ADD PRIMARY KEY (`id`),
@@ -373,87 +387,87 @@ ALTER TABLE `usuarios_cursos`
   ADD KEY `curso_id` (`curso_id`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT de las tablas volcadas
 --
 
 --
--- AUTO_INCREMENT for table `aulas`
+-- AUTO_INCREMENT de la tabla `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
--- AUTO_INCREMENT for table `calendario`
+-- AUTO_INCREMENT de la tabla `calendario`
 --
 ALTER TABLE `calendario`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `categorias`
+-- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `cursos`
+-- AUTO_INCREMENT de la tabla `cursos`
 --
 ALTER TABLE `cursos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `documentos`
+-- AUTO_INCREMENT de la tabla `documentos`
 --
 ALTER TABLE `documentos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `entregas`
+-- AUTO_INCREMENT de la tabla `entregas`
 --
 ALTER TABLE `entregas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `pagos`
+-- AUTO_INCREMENT de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
--- AUTO_INCREMENT for table `planes_servicio`
+-- AUTO_INCREMENT de la tabla `planes_servicio`
 --
 ALTER TABLE `planes_servicio`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `subcategorias`
+-- AUTO_INCREMENT de la tabla `subcategorias`
 --
 ALTER TABLE `subcategorias`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `usuarios`
+-- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT for table `usuarios_cursos`
+-- AUTO_INCREMENT de la tabla `usuarios_cursos`
 --
 ALTER TABLE `usuarios_cursos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- Constraints for dumped tables
+-- Restricciones para tablas volcadas
 --
 
 --
--- Constraints for table `aulas`
+-- Filtros para la tabla `aulas`
 --
 ALTER TABLE `aulas`
   ADD CONSTRAINT `aulas_ibfk_1` FOREIGN KEY (`profesor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `calendario`
+-- Filtros para la tabla `calendario`
 --
 ALTER TABLE `calendario`
   ADD CONSTRAINT `calendario_ibfk_1` FOREIGN KEY (`profesor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
@@ -461,44 +475,50 @@ ALTER TABLE `calendario`
   ADD CONSTRAINT `calendario_ibfk_3` FOREIGN KEY (`curso_id`) REFERENCES `cursos` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `categorias`
+-- Filtros para la tabla `categorias`
 --
 ALTER TABLE `categorias`
   ADD CONSTRAINT `categorias_ibfk_1` FOREIGN KEY (`curso_id`) REFERENCES `cursos` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `cursos`
+-- Filtros para la tabla `cursos`
 --
 ALTER TABLE `cursos`
   ADD CONSTRAINT `cursos_ibfk_1` FOREIGN KEY (`aula_id`) REFERENCES `aulas` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `documentos`
+-- Filtros para la tabla `documentos`
 --
 ALTER TABLE `documentos`
   ADD CONSTRAINT `documentos_ibfk_1` FOREIGN KEY (`subcategoria_id`) REFERENCES `subcategorias` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `entregas`
+-- Filtros para la tabla `entregas`
 --
 ALTER TABLE `entregas`
   ADD CONSTRAINT `entregas_ibfk_1` FOREIGN KEY (`alumno_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `entregas_ibfk_2` FOREIGN KEY (`curso_id`) REFERENCES `cursos` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `pagos`
+-- Filtros para la tabla `pagos`
 --
 ALTER TABLE `pagos`
   ADD CONSTRAINT `pagos_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `subcategorias`
+-- Filtros para la tabla `subcategorias`
 --
 ALTER TABLE `subcategorias`
   ADD CONSTRAINT `subcategorias_ibfk_1` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `usuarios_cursos`
+-- Filtros para la tabla `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD CONSTRAINT `fk_aula` FOREIGN KEY (`aulaId`) REFERENCES `aulas` (`id`);
+
+--
+-- Filtros para la tabla `usuarios_cursos`
 --
 ALTER TABLE `usuarios_cursos`
   ADD CONSTRAINT `usuarios_cursos_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
