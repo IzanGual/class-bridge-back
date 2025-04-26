@@ -2,12 +2,10 @@
 
 class dbCodigosVerificacion
 {
-    private $pdo; // Variable para la conexión PDO
+    private $pdo;
 
-    // Constructor: inicializa la conexión a la base de datos
     public function __construct()
     {
-        // Incluye el archivo de configuración
         $config = include 'dbConf.php';
 
         try {
@@ -20,9 +18,22 @@ class dbCodigosVerificacion
         }
     }
 
-    // Método para insertar un código de verificación
-    public function insertarCodigo($id_usuario, $codigo_verificacion, $expiracion)
-    {
+
+/**
+ * Inserta o actualiza un código de verificación para un usuario.
+ *
+ * Si el usuario ya tiene un código en la base de datos, lo actualiza; si no, lo inserta.
+ *
+ * @param int $id_usuario ID del usuario al que se le asigna el código.
+ * @param string $codigo_verificacion Código de verificación que se quiere guardar.
+ * @param string $expiracion Fecha y hora de expiración del código (formato DATETIME).
+ *
+ * @return bool Retorna `true` si la operación fue exitosa, `false` si ocurrió un error.
+ *
+ * @throws PDOException Si ocurre un error durante la ejecución de la consulta.
+ */
+public function insertarCodigo($id_usuario, $codigo_verificacion, $expiracion)
+{
         try {
             // Prepara la consulta SQL para insertar el código de verificación en la tabla
             $stmt = $this->pdo->prepare("INSERT INTO codigos_verificacion (id_usuario, codigo_verificacion, expiracion) 
@@ -36,14 +47,24 @@ class dbCodigosVerificacion
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
-            // Si ocurre un error, muestra el mensaje de error
+            // Si ocurre un error, devuelve false
             return false;
         }
-    }
+}
 
-    // Método para obtener el código de verificación de un usuario
-    public function obtenerCodigoPorUsuario($id_usuario)
-    {
+
+/**
+ * Obtiene el código de verificación asociado a un usuario.
+ *
+ * @param int $id_usuario ID del usuario del que se desea obtener el código de verificación.
+ *
+ * @return array|false Devuelve un array asociativo con los datos del código si existe,
+ *                     o `false` si no se encuentra o ocurre un error.
+ *
+ * @throws PDOException Si ocurre un error durante la consulta.
+ */
+public function obtenerCodigoPorUsuario($id_usuario)
+{
         try {
             // Prepara la consulta SQL para obtener el código de verificación
             $stmt = $this->pdo->prepare("SELECT * FROM codigos_verificacion WHERE id_usuario = :id_usuario");
@@ -56,11 +77,24 @@ class dbCodigosVerificacion
             // Si ocurre un error, devuelve false
             return false;
         }
-    }
+}
 
-    // Método para verificar si el código aún es válido
-    public function verificarCodigo($id_usuario, $codigo_verificacion)
-    {
+
+/**
+ * Verifica si el código de verificación es válido para un usuario.
+ *
+ * Comprueba que el código proporcionado coincida con el que está asociado al usuario
+ * y que aún no haya expirado.
+ *
+ * @param int $id_usuario ID del usuario cuyo código se verifica.
+ * @param string $codigo_verificacion El código de verificación a comprobar.
+ *
+ * @return bool `true` si el código es válido, `false` si no es válido o si ocurre un error.
+ *
+ * @throws PDOException Si ocurre un error durante la consulta.
+ */
+public function verificarCodigo($id_usuario, $codigo_verificacion)
+{
         try {
             // Prepara la consulta SQL para verificar si el código es correcto y aún válido
             $stmt = $this->pdo->prepare("SELECT * FROM codigos_verificacion WHERE id_usuario = :id_usuario AND codigo_verificacion = :codigo_verificacion AND expiracion > NOW()");
@@ -74,11 +108,22 @@ class dbCodigosVerificacion
             // Si ocurre un error, devuelve false
             return false;
         }
-    }
+}
 
-    // Método para eliminar un código (por ejemplo, si ya se usó o expiró)
-    public function eliminarCodigo($id_usuario)
-    {
+/**
+ * Elimina el código de verificación asociado a un usuario.
+ *
+ * Este método elimina el código de verificación, por ejemplo, si ya ha sido usado
+ * o si ha expirado.
+ *
+ * @param int $id_usuario ID del usuario cuyo código de verificación se desea eliminar.
+ *
+ * @return bool `true` si el código fue eliminado correctamente, `false` si ocurre un error.
+ *
+ * @throws PDOException Si ocurre un error durante la consulta.
+ */
+public function eliminarCodigo($id_usuario)
+{
         try {
             // Prepara la consulta SQL para eliminar el código de verificación
             $stmt = $this->pdo->prepare("DELETE FROM codigos_verificacion WHERE id_usuario = :id_usuario");
@@ -89,6 +134,8 @@ class dbCodigosVerificacion
             // Si ocurre un error, devuelve false
             return false;
         }
-    }
+}
+
+
 }
 ?>

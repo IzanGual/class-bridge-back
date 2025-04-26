@@ -1,12 +1,11 @@
 <?php
-require 'vendor/autoload.php'; // Asegúrate de que la biblioteca JWT está incluida
-require '../db/dbUsuarios.php';   // Archivo de conexión a la base de datos
-require '../db/dbAulas.php';   // Archivo de conexión a la base de datos
+require 'vendor/autoload.php';
+require '../db/dbUsuarios.php'; 
+require '../db/dbAulas.php'; 
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-// Configuración CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -14,7 +13,6 @@ header("Access-Control-Allow-Headers: Content-Type");
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load(); 
 
-// Manejo de preflight request (CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
@@ -37,7 +35,10 @@ if ($method === 'POST') {
 }
 
 /**
- * Manejo de autenticación de usuario y generación de JWT
+ * Maneja la verificaciond del usuario y la creacion del JWT
+ * 
+ * @param object $db Instancia de la clase de acceso a datos.
+ * Devuelve ua respuesta al cliente en funcion del estado de la autenticacion en el aula
  */
 function handleLogin($db) {
     $data = getRequestData();

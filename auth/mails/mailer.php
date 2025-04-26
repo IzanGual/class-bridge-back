@@ -1,30 +1,29 @@
 <?php
 session_start(); // Inicia la sesión
 
-header('Access-Control-Allow-Origin: *'); // Cambia '*' por la URL exacta
+header('Access-Control-Allow-Origin: *'); 
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, Origin, X-Requested-With");
-header("Access-Control-Allow-Credentials: true"); // Agregar para sesiones y cookies
+header("Access-Control-Allow-Credentials: true"); 
 
-// Manejo de preflight OPTIONS request
+// Manejo de preflight OPTIONS request para el cors de navegadores como google
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
 
-
+// Usamos la librería PHPMailer para enviar correos electrónicos
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require '../vendor/autoload.php'; // Si usaste Composer
-require '../../auth/jwtHelper.php'; // Archivo con funciones de JWT
-require '../../db/dbCodigos-Verificacion.php'; // Archivo con funciones de JWT
+require '../vendor/autoload.php';
+require '../../auth/jwtHelper.php'; // Archivo propio con funciones utiles de JWT
+require '../../db/dbCodigos-Verificacion.php'; // Archivo con la funcion de verificar la validez del token
 require '../../db/dbUsuarios.php'; 
 require '../../db/dbAulas.php'; 
 
 
-
-// Comprobamos si el token de sesión es válido (si corresponde)
+// Si el token no es válido respondemos con un error 401
 if (!validateToken()) {
     response(401, [
         'success' => false,
@@ -38,6 +37,7 @@ if (!validateToken()) {
         exit;
     }
     
+    // Según el action llamamos a la función correspondiente, si no corresponde con ninguna respondemos error 400
     switch ($data['action']) {
         case 'sendCode':
             sendCode();
@@ -57,13 +57,19 @@ if (!validateToken()) {
     
 }
 
-
+/**
+ * Envía un correo electrónico al usuario notificándole
+ * que su aula ya está lista para ser administrada.
+ *
+ * Utiliza PHPMailer para la configuración SMTP y envía, utilizamos brevo como SMTP.
+ * un email HTML personalizado con los datos del usuario y el aula.
+ */
 function sendInfoMail() {
     $dbAulas = new dbAulas();
     $db = new dbUsuarios();
     $userMail = "";
     
-    $id_usuario = getUserIdFromToken(); // Obtener el ID del usuario de la solicitud
+    $id_usuario = getUserIdFromToken(); // Obtener el ID del usuario de la solicitud utilizando jwtHelper
     $userInfo = $db->getUserById($id_usuario);
     $aula = $dbAulas->getAulaById($id_usuario);
     $aulaName = $aula['nombre'];
@@ -80,11 +86,11 @@ function sendInfoMail() {
     $mail = new PHPMailer(true);
 
     try {
-        $mail->CharSet = 'UTF-8';  // Asegúrate de colocar esto primero
+        $mail->CharSet = 'UTF-8';  
         $mail->isSMTP();
         $mail->Host = 'smtp-relay.brevo.com'; // Host SMTP de Brevo
         $mail->SMTPAuth = true;
-        $mail->Username = '851f2e001@smtp-brevo.com'; // El correo asociado a tu cuenta Brevo
+        $mail->Username = '851f2e001@smtp-brevo.com'; // El correo asociado a la cuenta de Brevo
         $mail->Password = $_ENV['SMTP_KEY'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // O SSL si usas el puerto 465
         $mail->Port = 587; // Puerto de Brevo
@@ -176,7 +182,9 @@ function sendInfoMail() {
 
 
 
-// Función para enviar el código de verificación
+/**
+ * Envía un correo electrónico al usuario con un codigo de verificacion que se crea en el servidor
+ */
 function sendCode() {
 
     $data = getRequestData();
@@ -187,7 +195,7 @@ function sendCode() {
 
     $expiresAt = date('Y-m-d H:i:s', strtotime('+10 minutes'));
 
-    $id_usuario = getUserIdFromToken(); // Aquí debes obtener el ID del usuario de la solicitud
+    $id_usuario = getUserIdFromToken(); // Obtenemos el id del usuario
 
     $insertResult = $db->insertarCodigo($id_usuario, $verificationCode, $expiresAt);
 
@@ -200,11 +208,11 @@ function sendCode() {
         $mail = new PHPMailer(true);
 
         try {
-            $mail->CharSet = 'UTF-8';  // Asegúrate de colocar esto primero
+            $mail->CharSet = 'UTF-8';
             $mail->isSMTP();
             $mail->Host = 'smtp-relay.brevo.com'; // Host SMTP de Brevo
             $mail->SMTPAuth = true;
-            $mail->Username = '851f2e001@smtp-brevo.com'; // El correo asociado a tu cuenta Brevo
+            $mail->Username = '851f2e001@smtp-brevo.com'; 
             $mail->Password = $_ENV['SMTP_KEY'];
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // O SSL si usas el puerto 465
             $mail->Port = 587; // Puerto de Brevo
@@ -295,7 +303,7 @@ function sendCode() {
     }
 }
 
-// Función para verificar el código de verificación
+// Función para verificar el código de verificación, 
 function verifyCode() {
     $data = getRequestData();
 
@@ -325,7 +333,7 @@ function verifyCode() {
 
     // Verificar si el código ingresado por el usuario es el correcto
     if ((int)$result['codigo_verificacion'] === (int)$data['verificationCode']) {
-        // El código es correcto, eliminamos el código de la base de datos (opcional)
+        // Si el email es correcto eliminamos el codigo de la bd
         $db->eliminarCodigo(getUserIdFromToken());
         response(200, ['success' => true, 'message' => 'Código de verificación válido.']);
     } else {
@@ -347,6 +355,10 @@ function response($statusCode, $data) {
     exit;
 }
 
+
+/**
+ * Devuelve los datos de la solicitud en función del tipo de contenido
+ */
 function getRequestData() {
     $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 

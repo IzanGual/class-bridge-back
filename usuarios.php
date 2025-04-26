@@ -15,13 +15,8 @@ require 'db/dbUsuarios.php'; // Archivo de conexión a la base de datos
 require 'db/dbAulas.php'; // Archivo de conexión a la base de datos
 require 'db/dbPagos.php'; // Archivo de conexión a la base de datos
 
-
-
-// Instancia de la clase de acceso a datos
 $db = new dbUsuarios();
 
-
-// Obtener el método HTTP
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Manejo de la solicitud según el método HTTP
@@ -130,14 +125,12 @@ function handlePut($db) {
         if (isset($data['mail'])) {
             $response = $db->updateUserMail($userId, $data['mail']);
         
-            // Si la respuesta es un array con error, devolvemos error 400
             if (is_array($response) && isset($response['error'])) {
                 response(200, [
                     "success" => false,
                     "error" => $response['error']
                 ]);
             } else {
-                // Si no hay error, la actualización fue exitosa
                 response(200, [
                     'success' => true,
                     'message' => 'mailSuccessfullyUpdated'
@@ -154,7 +147,6 @@ function handlePut($db) {
                     "error" => $response['error']
                 ]);
             } else {
-                // Si no hay error, la actualización fue exitosa
                 response(200, [
                     'success' => true,
                     'message' => 'passSuccessfullyUpdated'
@@ -212,7 +204,6 @@ function handlePost($db) {
     } else {
         $data = getRequestData();
         
-        // Validar datos requeridos
         if (!isset($data['nombre'], $data['email'], $data['contraseña'])) {
             response(400, ['error' => 'Faltan parámetros']);
         } else {
@@ -220,21 +211,18 @@ function handlePost($db) {
                 $response = $db->registerUser($data['nombre'], $data['email'], $data['contraseña']);
                 
                 if ($response === true) {
-                    // Respuesta en caso de éxito utilizando la función `response`
                     response(200, [
                         "success" => true,
                         "message" => "Usuario creado con éxito"
                     ]);
                 } else {
-                    // Respuesta en caso de error utilizando la función `response`
                     response(200, [
                         "success" => false,
-                        "error" => $response['error']  // Extraemos el error devuelto desde la función registerUser
+                        "error" => $response['error']
                     ]);
                 }
             
             } catch (Exception $e) {
-                // Respuesta en caso de una excepción inesperada
                 response(500, [
                     "success" => false,
                     "error" => 'Error al procesar la solicitud: ' . $e->getMessage()
@@ -258,7 +246,6 @@ function handleDelete($db) {
 
     if($_GET["action"] == "deleteImage"){
 
-        // Llamamos a la función que elimina la imagen
         $deleted = handleImageDeletion($db, $userId);
     
         if ($deleted) {

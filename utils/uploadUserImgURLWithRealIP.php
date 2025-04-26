@@ -5,11 +5,11 @@ if ($_SERVER['REMOTE_ADDR'] !== '127.0.0.1' && $_SERVER['REMOTE_ADDR'] !== '::1'
     exit('Acceso denegado');
 }
 
-require '../db/dbUsuarios.php'; // Archivo de conexión a la base de datos
+require '../db/dbUsuarios.php';
 
-$db = new dbUsuarios(); // Instancia de la clase de acceso a datos
+$db = new dbUsuarios(); 
 
-$response = $db->updateIgmgURLWithRealIP(); // Llamada al método para actualizar las URLs
+$response = $db->updateIgmgURLWithRealIP(); 
 
 if ($response) {
     http_response_code(200); // Código de éxito

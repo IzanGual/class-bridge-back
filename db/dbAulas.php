@@ -20,7 +20,15 @@ class dbAulas
         }
     }
 
-    public function getAllAulas()
+/**
+ * Obtiene todos los registros de aulas de la base de datos.
+ *
+ * @return array|false Retorna un array asociativo con los datos de las aulas si tiene éxito,
+ *                     o `false` si ocurre un error en la consulta.
+ *
+ * @throws PDOException Si ocurre un error durante la ejecución de la consulta.
+ */
+public function getAllAulas()
 {
     try {
         $stmt = $this->pdo->prepare('SELECT * FROM aulas');
@@ -31,8 +39,18 @@ class dbAulas
     }
 }
 
-    // Método para insertar una nueva aula
-    public function insertAula($nombre, $profesor_id)
+/**
+ * Inserta un nuevo aula en la base de datos si el profesor no tiene ya un aula asignada
+ * y el nombre del aula no está duplicado.
+ *
+ * @param string $nombre Nombre del aula que se quiere registrar.
+ * @param int $profesor_id ID del profesor que va a ser asignado al aula.
+ *
+ * @return true|array Retorna `true` si la inserción fue exitosa, o un array con un mensaje de error en caso contrario.
+ *
+ * @throws PDOException Si ocurre un error durante la consulta a la base de datos.
+ */
+public function insertAula($nombre, $profesor_id)
 {
     try {
         // Comprobar si el profesor ya tiene un aula
@@ -69,9 +87,17 @@ class dbAulas
 }
 
 
-    // Método para eliminar aulas por profesor_id
-    public function deleteAulaByProfesor($profesor_id)
-    {
+/**
+ * Elimina el aula asociada a un profesor específico en la base de datos.
+ *
+ * @param int $profesor_id ID del profesor cuyo aula se desea eliminar.
+ *
+ * @return bool Retorna `true` si la eliminación fue exitosa, o `false` si ocurrió un error.
+ *
+ * @throws PDOException Si ocurre un error durante la ejecución de la consulta.
+ */
+public function deleteAulaByProfesor($profesor_id)
+{
         try {
             $stmt = $this->pdo->prepare("DELETE FROM aulas WHERE profesor_id = :profesor_id");
             $stmt->bindParam(':profesor_id', $profesor_id, PDO::PARAM_INT);
@@ -79,9 +105,19 @@ class dbAulas
         } catch (PDOException $e) {
             return false;
         }
-    }
+}
 
-    // Método para obtener un aula por su ID
+
+/**
+ * Obtiene los datos de un aula a partir de su ID.
+ *
+ * @param int $id ID del aula que se desea buscar.
+ *
+ * @return array|false Retorna un array asociativo con los datos del aula si existe,
+ *                     o `false` si no se encuentra o si ocurre un error.
+ *
+ * @throws PDOException Si ocurre un error durante la ejecución de la consulta.
+ */
 public function getAulaById($id)
 {
     try {
@@ -108,6 +144,17 @@ public function getAulaById($id)
     }
 }
 
+/**
+ * Verifica si un profesor es el propietario de un aula específica.
+ *
+ * @param int $aulaId ID del aula que se desea verificar.
+ * @param int $teacherId ID del profesor que se desea comprobar.
+ *
+ * @return bool Retorna `true` si el profesor es el propietario del aula, `false` en caso contrario
+ *              o si ocurre un error en la consulta.
+ *
+ * @throws PDOException Si ocurre un error durante la ejecución de la consulta.
+ */
 public function isTheTeacher($aulaId, $teacherId) 
 {
     try {

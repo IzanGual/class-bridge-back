@@ -1,12 +1,13 @@
 <?php
 
-require 'vendor/autoload.php'; // Asegurar que la biblioteca JWT está incluida
+require 'vendor/autoload.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\BeforeValidException;
 use Firebase\JWT\SignatureInvalidException;
 
+// Creamos dotenv para poder acceder a las variables de entorno en .env
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load(); 
 

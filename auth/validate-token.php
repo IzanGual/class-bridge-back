@@ -1,12 +1,11 @@
 <?php
-require 'vendor/autoload.php'; // Asegurar que la biblioteca JWT está incluida
+require 'vendor/autoload.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\BeforeValidException;
 use Firebase\JWT\SignatureInvalidException;
 
-// Configuración CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -14,7 +13,6 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 require 'jwtHelper.php';
 require '../db/dbAulas.php';   
 
-// Manejo de preflight request (CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;

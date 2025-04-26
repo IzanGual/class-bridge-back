@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../auth/vendor/autoload.php'; // Cargar Composer desde auth/
+require __DIR__ . '/../auth/vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load(); 

@@ -2,12 +2,10 @@
 
 class dbUsuarios
 {
-    private $pdo; // Variable per a la connexió PDO
+    private $pdo;
 
-    // Constructor: inicializa la conexió a la bbdd
     public function __construct()
     {
-        // Inclou l'arxiu de configuració
         $config = include 'dbConf.php';
 
         try {
@@ -21,8 +19,24 @@ class dbUsuarios
     }
 
 
-    // 
-    public function registerUser($nombre, $email, $pass) {
+/**
+ * Registra un nuevo usuario en la base de datos.
+ *
+ * Este método comprueba si el correo electrónico proporcionado ya está registrado. 
+ * Si el correo no existe, encripta la contraseña proporcionada y registra al nuevo usuario 
+ * en la tabla `usuarios`. Si el correo ya está registrado, devuelve un error.
+ *
+ * @param string $nombre El nombre del nuevo usuario.
+ * @param string $email El correo electrónico del nuevo usuario.
+ * @param string $pass La contraseña del nuevo usuario (sin encriptar).
+ *
+ * @return bool|array `true` si el registro fue exitoso, o un array con el error 
+ *                    `['error' => 'emailDup']` si el correo ya está registrado, 
+ *                    o un mensaje de error en caso de una excepción.
+ * @throws PDOException Si ocurre un error durante la consulta o inserción en la base de datos.
+ */    
+public function registerUser($nombre, $email, $pass) 
+{
         // Comprobamos si el email ya existe en la base de datos
         $checkStmt = $this->pdo->prepare("SELECT * FROM usuarios WHERE email = :email");
         $checkStmt->execute([':email' => $email]);
@@ -54,10 +68,27 @@ class dbUsuarios
             // En caso de error, devolvemos el mensaje de error
             return ['error' => 'Error al registrar usuario: ' . $e->getMessage()];
         }
-    }
+}
     
 
-    public function authenticateUser($email, $password) {
+
+/**
+ * Autentica a un usuario comprobando su email y contraseña.
+ *
+ * Este método consulta la base de datos para obtener los datos de un usuario 
+ * basándose en su correo electrónico. Si el usuario existe y la contraseña 
+ * proporcionada coincide con la almacenada (encriptada), el método devuelve 
+ * los datos del usuario sin la contraseña. Si no se encuentra al usuario 
+ * o la contraseña es incorrecta, devuelve `false`.
+ *
+ * @param string $email El correo electrónico del usuario que intenta autenticar.
+ * @param string $password La contraseña proporcionada por el usuario.
+ *
+ * @return array|false Un array con los datos del usuario (sin la contraseña) si la autenticación es exitosa, 
+ *                     o `false` si el email o la contraseña no son correctos.
+ */
+public function authenticateUser($email, $password) 
+{
         // Consulta para obtener los datos del usuario por email
         $query = "SELECT id, nombre, email, pass, tipo, estado_suscripcion FROM usuarios WHERE email = :email";
         
@@ -79,9 +110,24 @@ class dbUsuarios
         
         // Si no encontramos al usuario o la contraseña es incorrecta, devolvemos false
         return false;
-    }
+}
 
-    public function authenticateUserClass($aulaID, $email) {
+
+/**
+ * Verifica si el usuario tiene acceso a un aula específica.
+ *
+ * Este método consulta el aula asociada al correo electrónico del usuario y la compara 
+ * con el ID de aula proporcionado. Si coinciden, devuelve `true`, indicando que el usuario 
+ * tiene acceso al aula. Si no, devuelve `false`.
+ *
+ * @param int $aulaID El ID del aula que se quiere verificar.
+ * @param string $email El correo electrónico del usuario a verificar.
+ *
+ * @return bool `true` si el usuario tiene acceso al aula, `false` si no.
+ */
+
+public function authenticateUserClass($aulaID, $email) 
+{
         // Consulta para obtener el classId del usuario por email
         $query = "SELECT aulaId FROM usuarios WHERE email = :email";
         
@@ -101,11 +147,23 @@ class dbUsuarios
         
         // Si no hay coincidencia, devolvemos false
         return false;
-    }
+}
     
     
-    
-    public function getUserById($id) {
+
+/**
+ * Obtiene los detalles de un usuario por su ID.
+ *
+ * Este método consulta la base de datos para obtener la información de un usuario 
+ * utilizando su ID. Si el usuario existe, devuelve los datos correspondientes; 
+ * de lo contrario, devuelve `false`.
+ *
+ * @param int $id El ID del usuario a obtener.
+ *
+ * @return array|false Los datos del usuario si se encuentra, `false` si no se encuentra.
+ */
+public function getUserById($id) 
+{
         // Consulta para obtener los detalles del usuario por ID
         $query = "SELECT id, nombre, email, tipo, estado_suscripcion, img_url FROM usuarios WHERE id = :id";
         
@@ -123,9 +181,23 @@ class dbUsuarios
         
         // Si no encontramos el usuario, retornamos false
         return false;
-    }
+}
 
-    public function updateUserImage($idUsuario, $imgUrl) {
+
+/**
+ * Actualiza la imagen del usuario en la base de datos.
+ *
+ * Este método permite cambiar la URL de la imagen del usuario en la base de datos 
+ * usando su ID. Si la actualización es exitosa, devuelve `true`; si ocurre algún error, 
+ * devuelve `false`.
+ *
+ * @param int $idUsuario El ID del usuario cuya imagen se actualizará.
+ * @param string $imgUrl La nueva URL de la imagen del usuario.
+ *
+ * @return bool `true` si la actualización fue exitosa, `false` en caso contrario.
+ */
+public function updateUserImage($idUsuario, $imgUrl) 
+{
         // Consulta SQL para actualizar la imagen del usuario
         $query = "UPDATE usuarios SET img_url = :img_url WHERE id = :id";
         
@@ -147,9 +219,22 @@ class dbUsuarios
             //error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
             return false;
         }
-    }
+}
 
-    public function getUserImage($idUsuario) {
+
+
+/**
+ * Obtiene la URL de la imagen del usuario desde la base de datos.
+ *
+ * Este método consulta la base de datos para obtener la URL de la imagen de un usuario
+ * usando su ID. Si encuentra la imagen, devuelve la URL; si no, devuelve `null`.
+ *
+ * @param int $idUsuario El ID del usuario cuya imagen se recuperará.
+ *
+ * @return string|null La URL de la imagen del usuario si existe, `null` si no se encuentra.
+ */
+public function getUserImage($idUsuario) 
+{
         // Consulta SQL para obtener la URL de la imagen del usuario
         $query = "SELECT img_url FROM usuarios WHERE id = :id LIMIT 1";
     
@@ -171,9 +256,23 @@ class dbUsuarios
             //error_log("Error al obtener la imagen del usuario: " . $e->getMessage());
             return null;
         }
-    }
+}
 
-    public function updateUserName($idUsuario, $nombre) {
+
+
+/**
+ * Actualiza el nombre del usuario en la base de datos.
+ *
+ * Este método actualiza el nombre de un usuario específico utilizando su ID. Si la actualización
+ * es exitosa, devuelve `true`; de lo contrario, devuelve `false`.
+ *
+ * @param int $idUsuario El ID del usuario cuyo nombre se actualizará.
+ * @param string $nombre El nuevo nombre del usuario.
+ *
+ * @return bool `true` si la actualización fue exitosa, `false` en caso de error.
+ */
+public function updateUserName($idUsuario, $nombre) 
+{
         // Consulta SQL para actualizar la imagen del usuario
         $query = "UPDATE usuarios SET nombre = :nombre WHERE id = :id";
         
@@ -195,10 +294,25 @@ class dbUsuarios
             //error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
             return false;
         }
-    }
+}
 
-    
-    public function updateUserMail($idUsuario, $mail) {
+
+
+/**
+ * Actualiza el correo electrónico de un usuario en la base de datos.
+ *
+ * Este método actualiza el correo electrónico de un usuario específico utilizando su ID. Antes de
+ * realizar la actualización, verifica si el correo electrónico ya está registrado en otro usuario.
+ * Si el correo electrónico está duplicado, devuelve un error. Si la actualización es exitosa,
+ * devuelve `true`; de lo contrario, devuelve un error.
+ *
+ * @param int $idUsuario El ID del usuario cuyo correo electrónico se actualizará.
+ * @param string $mail El nuevo correo electrónico del usuario.
+ *
+ * @return mixed `true` si la actualización fue exitosa, un arreglo de error en caso contrario.
+ */
+public function updateUserMail($idUsuario, $mail) 
+{
         // Comprobamos si el email ya existe en otro usuario
         $checkStmt = $this->pdo->prepare("SELECT id FROM usuarios WHERE email = :email AND id != :id");
         $checkStmt->execute([
@@ -227,9 +341,25 @@ class dbUsuarios
         } catch (PDOException $e) {
             return ['error' => 'NotPosibleToUpdateEmail'];
         }
-    }
+}
 
-    public function updateUserPass($idUsuario, $pass) {
+
+
+/**
+ * Actualiza la contraseña de un usuario en la base de datos.
+ *
+ * Este método actualiza la contraseña de un usuario específico utilizando su ID. Primero verifica
+ * que el usuario exista en la base de datos. Luego, encripta la nueva contraseña y la actualiza en la
+ * base de datos. Si la actualización es exitosa, devuelve `true`. Si no se encuentra el usuario o
+ * ocurre algún error, devuelve un mensaje de error.
+ *
+ * @param int $idUsuario El ID del usuario cuya contraseña se actualizará.
+ * @param string $pass La nueva contraseña del usuario.
+ *
+ * @return mixed `true` si la actualización fue exitosa, un arreglo con un mensaje de error en caso contrario.
+ */
+public function updateUserPass($idUsuario, $pass) 
+{
         // Verificamos si el usuario existe
         $checkStmt = $this->pdo->prepare("SELECT id FROM usuarios WHERE id = :id");
         $checkStmt->execute([':id' => $idUsuario]);
@@ -259,9 +389,25 @@ class dbUsuarios
         } catch (PDOException $e) {
             return ['error' => 'Error updating password: ' . $e->getMessage()];
         }
-    }
+}
 
-    public function deleteUserProfile($userId) {
+
+
+/**
+ * Elimina el perfil de un usuario de la base de datos.
+ *
+ * Este método elimina un usuario específico de la base de datos mediante su ID. Primero verifica si
+ * el usuario existe en la base de datos. Si el usuario existe, procede a eliminarlo. Si la eliminación
+ * es exitosa, devuelve `true`. Si no se encuentra el usuario o ocurre algún error, devuelve un mensaje
+ * de error.
+ *
+ * @param int $userId El ID del usuario cuyo perfil se eliminará.
+ *
+ * @return mixed `true` si la eliminación fue exitosa, un arreglo con un mensaje de error en caso contrario.
+ */
+
+public function deleteUserProfile($userId) 
+{
         try {
             // Verificamos si el usuario existe
             $checkStmt = $this->pdo->prepare("SELECT id FROM usuarios WHERE id = :id");
@@ -285,9 +431,23 @@ class dbUsuarios
         } catch (PDOException $e) {
             return ['error' => 'Error deleting user: ' . $e->getMessage()];
         }
-    }
+}
     
-    public function updateUserRoleToTeacher($idUsuario) {
+
+
+/**
+ * Actualiza el rol y estado de suscripción de un usuario a "profesor".
+ *
+ * Este método cambia el rol de un usuario a "profesor" y su estado de suscripción a "activo". Si la 
+ * actualización es exitosa, devuelve `true`. Si ocurre un error durante el proceso, devuelve un mensaje
+ * de error.
+ *
+ * @param int $idUsuario El ID del usuario cuyo rol y estado de suscripción se actualizarán.
+ *
+ * @return mixed `true` si la actualización fue exitosa, un arreglo con un mensaje de error en caso contrario.
+ */
+public function updateUserRoleToTeacher($idUsuario) 
+{
         try {
             // Definir los valores fijos
             $Rol = "profesor";
@@ -311,9 +471,23 @@ class dbUsuarios
         } catch (PDOException $e) {
             return ['error' => 'Error al actualizar el rol: ' . $e->getMessage()];
         }
-    }
+}
 
-    public function degradeUserRoleToCanceled($idUsuario) {
+
+
+/**
+ * Degrada el rol y estado de suscripción de un usuario a "normal" y "cancelado".
+ *
+ * Este método cambia el rol de un usuario a "normal" y su estado de suscripción a "cancelado". Si la 
+ * actualización es exitosa, devuelve `true`. Si ocurre un error durante el proceso, devuelve un mensaje
+ * de error.
+ *
+ * @param int $idUsuario El ID del usuario cuyo rol y estado de suscripción se actualizarán.
+ *
+ * @return mixed `true` si la actualización fue exitosa, un arreglo con un mensaje de error en caso contrario.
+ */
+public function degradeUserRoleToCanceled($idUsuario) 
+{
         try {
             // Definir los valores fijos
             $Rol = "normal";
@@ -337,11 +511,20 @@ class dbUsuarios
         } catch (PDOException $e) {
             return ['error' => 'Error al actualizar el rol: ' . $e->getMessage()];
         }
-    }
+}
 
 
-    
-    public function updateIgmgURLWithRealIP() {
+/**
+ * Actualiza la URL de la imagen de todos los usuarios con la IP real del servidor.
+ *
+ * Este método obtiene la dirección IP del servidor mediante `gethostbyname()`, construye una nueva URL
+ * para la imagen del perfil y actualiza el campo `img_url` de todos los usuarios con esta nueva URL.
+ * Si la operación es exitosa, devuelve `true`; en caso contrario, devuelve un mensaje de error.
+ *
+ * @return mixed `true` si la actualización fue exitosa, un arreglo con un mensaje de error en caso contrario.
+ */
+public function updateIgmgURLWithRealIP() 
+{
         try {
             // Obtener la IP del servidor usando gethostbyname() para asegurarnos de que sea IPv4
             $ipServidor = gethostbyname(gethostname());
@@ -363,18 +546,8 @@ class dbUsuarios
         } catch (PDOException $e) {
             return ['error' => 'Error al actualizar img_url: ' . $e->getMessage()];
         }
-    }
+}
     
     
-    
-    
-    
-    
-
-    
-
-    
-
-   
 
 }

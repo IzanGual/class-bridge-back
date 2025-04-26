@@ -2,9 +2,8 @@
 
 class dbPagos
 {
-    private $pdo; // Conexión PDO
+    private $pdo;
 
-    // Constructor: inicializa la conexión a la base de datos
     public function __construct()
     {
         $config = include 'dbConf.php';
@@ -21,9 +20,21 @@ class dbPagos
         }
     }
 
-    // Método para insertar un nuevo pago
-    public function insertPago($usuarioId, $monto)
-    {
+
+/**
+ * Inserta un nuevo pago en la base de datos.
+ *
+ * Este método inserta un nuevo registro de pago con la información proporcionada,
+ * utilizando valores predeterminados para el método de pago y el estado.
+ *
+ * @param int $usuarioId ID del usuario que realizó el pago.
+ * @param float $monto Monto del pago realizado.
+ *
+ * @return bool `true` si el pago fue insertado correctamente, `false` en caso contrario.
+ * @throws PDOException Si ocurre un error durante la ejecución de la consulta.
+ */
+public function insertPago($usuarioId, $monto)
+{
         try {
             // Valores predeterminados
             $metodoPago = "Tarjeta de credito";
@@ -49,5 +60,6 @@ class dbPagos
         } catch (PDOException $e) {
             return ['error' => 'Error al insertar el pago: ' . $e->getMessage()];
         }
-    }
+}
+
 }
