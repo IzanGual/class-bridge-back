@@ -6,16 +6,14 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
 header('Allow: GET, POST, PUT, DELETE');
 
-// Manejo de preflight request (CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-require 'db/dbPlanes.php'; // Archivo de conexión a la base de datos
-require 'auth/jwtHelper.php'; // Archivo con funciones de JWT
+require 'db/dbPlanes.php'; 
+require 'auth/jwtHelper.php'; 
 
-// Instancia de la clase de acceso a datos
 $db = new dbPlanes();
 
 $method = $_SERVER['REQUEST_METHOD'];

@@ -4,18 +4,15 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Manejo de preflight request (CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
 
-require 'db/dbUsuarios.php'; // Archivo de conexión a la base de datos
+require 'db/dbUsuarios.php'; 
 
-// Instancia de la clase de acceso a datos
 $db = new dbUsuarios();
 
-// Obtener el método HTTP
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Manejo de la solicitud según el método HTTP
@@ -40,8 +37,7 @@ switch ($method) {
  * Manejo de solicitudes GET
  */
 function handleGet($db) {
-    // Implementar lógica para obtener usuarios si es necesario
-    response(200, ['message' => 'GET request recibida']);
+    response(200, ['message' => 'get not developed']);
 }
 
 /**
