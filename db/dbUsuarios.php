@@ -184,6 +184,44 @@ public function getUserById($id)
 }
 
 
+
+/**
+ * Obtiene una lista de usuarios tipo 'alumno' que pertenecen a un aula específica.
+ *
+ * Este método consulta la base de datos para obtener todos los usuarios 
+ * cuyo campo `aulaId` coincida con el proporcionado y cuyo tipo sea 'alumno'. 
+ * Si la consulta se ejecuta correctamente, devuelve el array de usuarios 
+ * (puede estar vacío). En caso de error al ejecutar la consulta, devuelve `false`.
+ *
+ * @param int $aula_id El ID del aula cuyos alumnos se desean obtener.
+ *
+ * @return array|false Un array con los alumnos encontrados (puede estar vacío), 
+ *                     o `false` si ocurre un error en la consulta.
+ */
+public function getUsersByAulaId($aula_id) 
+{
+    try {
+        // Consulta para obtener los usuarios tipo 'alumno' con el aulaId dado
+        $query = "SELECT id, nombre, email, tipo, aulaId, img_url 
+                  FROM usuarios 
+                  WHERE aulaId = :aula_id AND tipo = 'alumno'";
+        
+        // Preparamos y ejecutamos la consulta
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':aula_id' => $aula_id]);
+        
+        // Obtenemos todos los usuarios que coinciden
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Retornamos el array de usuarios (puede estar vacío)
+        return $users;
+    } catch (PDOException $e) {
+        // Si ocurre un error en la consulta, retornamos false
+        return false;
+    }
+}
+
+
 /**
  * Actualiza la imagen del usuario en la base de datos.
  *

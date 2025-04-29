@@ -64,8 +64,9 @@ switch ($method) {
  */
 function handleGet($db) {
     try {
+        // Si se proporciona un ID de usuario, buscar por ID
         if (isset($_GET['id'])) {
-            $user = $db->getUserById($_GET['id'] ?? null); 
+            $user = $db->getUserById($_GET['id']);
             if ($user) {
                 response(200, [
                     'success' => true,
@@ -77,16 +78,35 @@ function handleGet($db) {
                     'error' => 'Usuario no encontrado'
                 ]);
             }
-        } else {
-            response(400, [
-                'success' => false,
-                'error' => 'Debes proporcionar un ID'
-            ]);
+            return; // Salir después de manejar este caso
         }
+
+        // Si se proporciona un ID de aula, buscar usuarios por aula
+        if (isset($_GET['aula_id'])) {
+            $users = $db->getUsersByAulaId($_GET['aula_id']);
+            if ($users) {
+                response(200, [
+                    'success' => true,
+                    'users' => $users
+                ]);
+            } else {
+                response(404, [
+                    'success' => false,
+                    'error' => 'No se encontraron usuarios en el aula'
+                ]);
+            }
+            return; // Salir después de manejar este caso
+        }
+
+        // Si no se proporciona ni `id` ni `aula_id`, devolver un error
+        response(400, [
+            'success' => false,
+            'error' => 'Debes proporcionar un parámetro válido (id o aula_id)'
+        ]);
     } catch (Exception $e) {
         response(500, [
             'success' => false,
-            'error' => 'Error al obtener el usuario: ' . $e->getMessage()
+            'error' => 'Error al procesar la solicitud: ' . $e->getMessage()
         ]);
     }
 }
