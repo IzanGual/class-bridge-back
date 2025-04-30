@@ -10,10 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require 'db/dbTareas.php';
+require 'db/dbCursos.php';
 require 'auth/jwtHelper.php'; // Archivo con funciones de JWT
 
-$db = new dbTareas();
+$db = new dbCursos();
 
 $method = $_SERVER['REQUEST_METHOD'];
 if (!validateToken()) {
@@ -46,10 +46,9 @@ if (!validateToken()) {
  */
 function handleGet($db) {
     try {
-        if (isset($_GET['accion'])) {
-            if ($_GET['accion'] == 'getUnDoneTasks') {
+        if (isset($_GET['aula_id'])) {
 
-                $response = $db->getUnDoneTareas();
+                $response = $db->getOwnCourses($_GET['aula_id']);
 
                 if(!$response){
                     response(200, [
@@ -60,16 +59,10 @@ function handleGet($db) {
                 else{
                     response(200, [
                         'success' => true,
-                        'tasks' => $response
+                        'courses' => $response
                     ]);
                 }
-                
-            } else {
-                response(200, [
-                    'success' => false,
-                    'error' => 'accion not allowed'
-                ]);
-            }
+            
         } else {
 
             response(200, [

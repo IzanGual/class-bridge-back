@@ -6,14 +6,24 @@ if ($_SERVER['REMOTE_ADDR'] !== '127.0.0.1' && $_SERVER['REMOTE_ADDR'] !== '::1'
 }
 
 require '../db/dbUsuarios.php';
+require '../db/dbCursos.php';
 
 $db = new dbUsuarios(); 
 
 $response = $db->updateIgmgURLWithRealIP(); 
 
 if ($response) {
-    http_response_code(200); // Código de éxito
-    echo json_encode(['success' => true, 'message' => 'URLs actualizadas correctamente.']);
+    $db = new dbCursos(); 
+
+    $response = $db->updateIgmgURLWithRealIP();
+    if ($response) {
+        http_response_code(200); // Código de éxito
+        echo json_encode(['success' => true, 'message' => 'URLs actualizadas correctamente.']);
+    } else {
+        http_response_code(500); // Error interno del servidor
+        echo json_encode(['success' => false, 'error' => 'Error al actualizar las URLs.']);
+    }
+
 } else {
     http_response_code(500); // Error interno del servidor
     echo json_encode(['success' => false, 'error' => 'Error al actualizar las URLs.']);
