@@ -46,35 +46,49 @@ if (!validateToken()) {
  */
 function handleGet($db) {
     try {
-        if (isset($_GET['aula_id'])) {
-
-                $response = $db->getOwnCourses($_GET['aula_id']);
-
-                if(!$response){
-                    response(200, [
-                        'success' => false,
-                        'error' => 'Error al obtener las tareas e el servidor'
-                    ]);
-                }
-                else{
-                    response(200, [
-                        'success' => true,
-                        'courses' => $response
-                    ]);
-                }
-            
-        } else {
-
-            response(200, [
-                'success' => false,
-                'error' => 'accion not provided'
-            ]);
-            
+       
+        if (isset($_GET['getUsersByCourse_id'])) {
+            $users = $db->getUsersByCourse_id($_GET['getUsersByCourse_id']);
+            if ($users) {
+                response(200, [
+                    'success' => true,
+                    'users' => $users
+                ]);
+            } else {
+                response(404, [
+                    'success' => false,
+                    'error' => 'Curso no encontrado'
+                ]);
+            }
+            return; 
         }
-    } catch (Exception $e) {
-        response(200, [
+
+       
+        if (isset($_GET['aula_id'])) {
+            $courses = $db->getOwnCourses($_GET['aula_id']);
+            if ($courses) {
+                response(200, [
+                    'success' => true,
+                    'courses' => $courses
+                ]);
+            } else {
+                response(404, [
+                    'success' => false,
+                    'error' => 'No se encontraron cursos para el aula'
+                ]);
+            }
+            return; 
+        }
+
+        
+        response(400, [
             'success' => false,
-            'error' => 'Error al obtener las tasks: ' . $e->getMessage()
+            'error' => 'Debes proporcionar un parámetro válido (getUsersByCourse_id o aula_id)'
+        ]);
+    } catch (Exception $e) {
+        response(500, [
+            'success' => false,
+            'error' => 'Error al procesar la solicitud: ' . $e->getMessage()
         ]);
     }
 }

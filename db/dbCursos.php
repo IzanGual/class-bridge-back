@@ -89,11 +89,38 @@ public function getOwnCourses($aula_id)
         return $cursos;
 
     } catch (PDOException $e) {
-        // Puedes registrar el error si lo necesitas
+        
         return false;
     }
 }
 
+/**
+ * Método que obtiene los usuarios asociados a un curso específico desde la tabla 'usuarios_cursos',
+ * y devuelve su id y nombre mediante un JOIN con la tabla 'usuarios'.
+ * Devuelve un array con los usuarios si hay resultados, o false en caso de error o si no hay ninguno.
+ */
+public function getUsersByCourse_id($course_id)
+{
+    try {
+        $query = "
+            SELECT u.id, u.nombre
+            FROM usuarios_cursos uc
+            JOIN usuarios u ON u.id = uc.usuario_id
+            WHERE uc.curso_id = :course_id
+        ";
+
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':course_id' => $course_id]);
+
+        $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $usuarios ?: false;
+
+    } catch (PDOException $e) {
+        
+        return false;
+    }
+}
 
 
 
