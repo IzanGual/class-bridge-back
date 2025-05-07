@@ -176,13 +176,9 @@ function handleDelete($db) {
             } else {
                 response(200, ['success' => false, 'error' => 'Error al eliminar el curso de la BD.']);
             }
-            
         
-
-       
-
-    
-        
+    }else{
+        response(200, ['success' => false, 'error' => 'No se ha espicificado accion']);
     }
 
 }
