@@ -114,13 +114,220 @@ public function getUsersByCourse_id($course_id)
 
         $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return $usuarios ?: false;
+        return $usuarios;
 
     } catch (PDOException $e) {
         
         return false;
     }
 }
+
+
+/**
+ * Actualiza la imagen de un curso en la base de datos.
+ *
+ * Este método permite cambiar la URL de la imagen de un curso en la base de datos 
+ * usando su ID. Si la actualización es exitosa, devuelve `true`; si ocurre algún error, 
+ * devuelve `false`.
+ *
+ * @param int $idCurso El ID del curso cuya imagen se actualizará.
+ * @param string $imgUrl La nueva URL de la imagen del curso.
+ *
+ * @return bool `true` si la actualización fue exitosa, `false` en caso contrario.
+ */
+public function uploadCourse($idCurso, $nombreCurso, $usuarios) {
+    try {
+        // Si los usuarios llegan como string separados por comas, convertir a array
+        if (is_string($usuarios) && $usuarios !== 'noUsers') {
+            $usuarios = explode(',', $usuarios);
+        }
+
+        // Iniciar transacción
+        $this->pdo->beginTransaction();
+
+        // 1. Actualizar el nombre del curso
+        $queryNombre = "UPDATE cursos SET nombre = :nombre WHERE id = :id";
+        $stmtNombre = $this->pdo->prepare($queryNombre);
+        $stmtNombre->execute([
+            ':nombre' => $nombreCurso,
+            ':id' => $idCurso
+        ]);
+
+        // 2. Eliminar todas las relaciones anteriores
+        $queryDelete = "DELETE FROM usuarios_cursos WHERE curso_id = :curso_id";
+        $stmtDelete = $this->pdo->prepare($queryDelete);
+        $stmtDelete->execute([':curso_id' => $idCurso]);
+
+        // 3. Insertar nuevas relaciones (si hay usuarios válidos)
+        if (is_array($usuarios)) {
+            $queryInsert = "INSERT INTO usuarios_cursos (usuario_id, curso_id) VALUES (:usuario_id, :curso_id)";
+            $stmtInsert = $this->pdo->prepare($queryInsert);
+
+            foreach ($usuarios as $usuarioId) {
+                if (is_numeric($usuarioId)) {
+                    $stmtInsert->execute([
+                        ':usuario_id' => $usuarioId,
+                        ':curso_id' => $idCurso
+                    ]);
+                }
+            }
+        }
+
+        // Confirmar cambios
+        $this->pdo->commit();
+        return true;
+
+    } catch (PDOException $e) {
+        $this->pdo->rollBack();
+        return false;
+    }
+}
+
+
+/**
+ * Actualiza la imagen del usuario en la base de datos.
+ *
+ * Este método permite cambiar la URL de la imagen del usuario en la base de datos 
+ * usando su ID. Si la actualización es exitosa, devuelve `true`; si ocurre algún error, 
+ * devuelve `false`.
+ *
+ * @param int $idUsuario El ID del usuario cuya imagen se actualizará.
+ * @param string $imgUrl La nueva URL de la imagen del usuario.
+ *
+ * @return bool `true` si la actualización fue exitosa, `false` en caso contrario.
+ */
+public function updateCourseBanner($id, $imgUrl) 
+{
+        // Consulta SQL para actualizar la imagen del usuario
+        $query = "UPDATE cursos SET img_url = :img_url WHERE id = :id";
+        
+        try {
+            // Preparamos la consulta
+            $stmt = $this->pdo->prepare($query);
+    
+            // Ejecutamos la consulta con los valores proporcionados
+            $success = $stmt->execute([
+                ':img_url' => $imgUrl,
+                ':id' => $id
+            ]);
+    
+            // Si la ejecución fue exitosa, devolvemos true, independientemente de si rowCount() es 0
+            return $success;
+    
+        } catch (PDOException $e) {
+            // Si hay un error real en la ejecución, lo registramos y devolvemos false
+            //error_log("Error al actualizar la imagen del usuario: " . $e->getMessage());
+            return false;
+        }
+}
+
+/**
+ * Obtiene la URL de la imagen (banner) de un curso por su ID.
+ *
+ * @param int $id El ID del curso.
+ * @return string|null La URL de la imagen si se encuentra, o null si no existe o hay error.
+ */
+public function getCourseBanner($id) 
+{
+    $query = "SELECT img_url FROM cursos WHERE id = :id";
+
+    try {
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':id' => $id]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result && isset($result['img_url'])) {
+            return $result['img_url'];
+        } else {
+            return false;
+        }
+    } catch (PDOException $e) {
+        //error_log("Error al obtener el banner del curso: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Elimina un curso y todo su contenido asociado (archivos en la carpeta de uploads).
+ *
+ * @param int $courseId El ID del curso a eliminar.
+ * @return bool True si el curso se eliminó correctamente, false en caso contrario.
+ */
+public function deleteCourse($courseId) 
+{
+    // Obtenemos la ruta de la carpeta del curso
+    $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/" . $courseId;
+
+    // Iniciamos la transacción para eliminar de forma segura
+    $this->pdo->beginTransaction();
+
+    try {
+        // Eliminar entregas relacionadas con las categorías de este curso
+        $query = "DELETE e FROM entregas e
+                  INNER JOIN categorias c ON e.categoria_id = c.id
+                  WHERE c.curso_id = :courseId";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':courseId' => $courseId]);
+
+        // Eliminar categorías relacionadas con este curso
+        $query = "DELETE FROM categorias WHERE curso_id = :courseId";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':courseId' => $courseId]);
+
+        // Eliminar todos los archivos dentro de la carpeta del curso
+        // Eliminar todos los archivos dentro de la carpeta del curso
+        if (is_dir($courseFolderPath)) {
+            $this->deleteDirectoryContents($courseFolderPath);
+            rmdir($courseFolderPath);
+            //echo("La carpeta : $courseFolderPath");
+        } else {
+            //echo("La carpeta no existe: $courseFolderPath");
+        }
+
+        // Eliminar el curso de la base de datos
+        $query = "DELETE FROM cursos WHERE id = :id";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':id' => $courseId]);
+
+        // Confirmamos la transacción
+        $this->pdo->commit();
+        return true;
+
+    } catch (PDOException $e) {
+        $this->pdo->rollBack();
+        echo "Error al eliminar el curso: " . $e->getMessage();
+        return false;
+    }
+}
+/**
+ * Elimina todos los archivos dentro de un directorio y luego el directorio.
+ *
+ * @param string $dir Ruta del directorio a eliminar.
+ * @return void
+ */
+private function deleteDirectoryContents($dir)
+{
+    if (!is_dir($dir)) return;
+
+    $items = scandir($dir);
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') continue;
+
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+
+        if (is_dir($path)) {
+            $this->deleteDirectoryContents($path); // Recursivo
+            rmdir($path); // Elimina subcarpeta vacía
+        } else {
+            unlink($path); // Elimina archivo
+        }
+    }
+}
+
+
+
+
 
 
 

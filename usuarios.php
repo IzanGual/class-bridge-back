@@ -23,7 +23,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':  
         if (!validateToken()) {
-            response(401, [
+            response(200, [
                 'success' => false,
                 'error' => 'invalidToken'
             ]);
@@ -36,7 +36,7 @@ switch ($method) {
         break;
     case 'PUT':
         if (!validateToken()) {
-            response(401, [
+            response(200, [
                 'success' => false,
                 'error' => 'invalidToken'
             ]);
@@ -46,7 +46,7 @@ switch ($method) {
         break;
     case 'DELETE':
         if (!validateToken()) {
-            response(401, [
+            response(200, [
                 'success' => false,
                 'error' => 'invalidToken'
             ]);
