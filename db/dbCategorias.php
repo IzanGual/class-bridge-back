@@ -1,6 +1,6 @@
 <?php
 
-class dbApartados
+class dbCategorias
 {
     private $pdo;
 
@@ -29,10 +29,10 @@ class dbApartados
  *                     o `false` en caso de error.
  * @throws PDOException Si ocurre un error durante la ejecución de la consulta.
  */
-public function getApartadosByCourseId($id)
+public function getCategoriasByApartadoId($id)
 {
     try {
-        $stmt = $this->pdo->prepare("SELECT * FROM apartados WHERE curso_id = :id");
+        $stmt = $this->pdo->prepare("SELECT * FROM categorias WHERE apartado_id = :id");
         $stmt->execute([':id' => $id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -47,33 +47,37 @@ public function getApartadosByCourseId($id)
  * @param string $nuevoNombre El nuevo nombre para el apartado.
  * @return bool True si la actualización fue exitosa, false en caso contrario.
  */
-public function updateApartado($apartadoId, $nuevoNombre)
+
+public function updateCategoria($categoriaId, $nuevoNombre)
 {
     try {
-        $stmt = $this->pdo->prepare("UPDATE apartados SET nombre = :nombre WHERE id = :id");
+        $stmt = $this->pdo->prepare("UPDATE categorias SET nombre = :nombre WHERE id = :id");
         return $stmt->execute([
             ':nombre' => $nuevoNombre,
-            ':id' => $apartadoId
+            ':id' => $categoriaId
         ]);
     } catch (PDOException $e) {
         return false;
     }
 }
 
+
 /**
- * Inserta un nuevo apartado en la base de datos.
+ * Inserta una nueva categoría en la base de datos.
  *
- * @param string $nombre El nombre del nuevo apartado.
- * @param int $cursoId El ID del curso al que pertenece el apartado.
+ * @param string $nombre El nombre de la nueva categoría.
+ * @param int $cursoId El ID del curso al que pertenece la categoría.
+ * @param int $apartadoId El ID del apartado al que pertenece la categoría.
  * @return bool True si se insertó correctamente, false en caso contrario.
  */
-public function insertApartado($nombre, $cursoId)
+public function insertCategoria($nombre, $cursoId, $apartadoId)
 {
     try {
-        $stmt = $this->pdo->prepare("INSERT INTO apartados (nombre, curso_id) VALUES (:nombre, :curso_id)");
+        $stmt = $this->pdo->prepare("INSERT INTO categorias (nombre, curso_id, apartado_id) VALUES (:nombre, :curso_id, :apartado_id)");
         return $stmt->execute([
             ':nombre' => $nombre,
-            ':curso_id' => $cursoId
+            ':curso_id' => $cursoId,
+            ':apartado_id' => $apartadoId
         ]);
     } catch (PDOException $e) {
         return false;
@@ -82,44 +86,50 @@ public function insertApartado($nombre, $cursoId)
 
 
 
-
 /**
- * Elimina un apartado y su carpeta asociada.
+ * Elimina una categoría de la base de datos y su carpeta asociada.
+ * Las entregas y documentos se eliminan automáticamente por las claves foráneas ON DELETE CASCADE.
  *
- * @param int $idApartado El ID del apartado a eliminar.
- * @return bool True si se eliminó correctamente, false en caso contrario.
+ * @param int $idCategoria El ID de la categoría a eliminar.
+ * @return bool True si la categoría se eliminó correctamente, false en caso contrario.
  */
-public function deleteApartado($idApartado)
+public function deleteCategoria($idCategoria)
 {
     try {
-        // Obtener el ID del curso al que pertenece el apartado
-        $query = "SELECT curso_id FROM apartados WHERE id = :idApartado";
+        // Obtener curso_id y apartado_id para construir la ruta
+        $query = "SELECT curso_id, apartado_id FROM categorias WHERE id = :id";
         $stmt = $this->pdo->prepare($query);
-        $stmt->execute([':idApartado' => $idApartado]);
-        $curso = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->execute([':id' => $idCategoria]);
+        $categoria = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($curso) {
-            $courseId = $curso['curso_id'];
-            $apartadoFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/$courseId/apartados/$idApartado";
+        if ($categoria) {
+            $courseId = $categoria['curso_id'];
+            $apartadoId = $categoria['apartado_id'];
 
-            if (is_dir($apartadoFolderPath)) {
-                $this->deleteDirectoryContents($apartadoFolderPath);
-                rmdir($apartadoFolderPath);
+            // Ruta actualizada que incluye el apartado
+            $categoriaFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/$courseId/apartados/$apartadoId/categorias/$idCategoria";
+
+            if (is_dir($categoriaFolderPath)) {
+                $this->deleteDirectoryContents($categoriaFolderPath);
+                rmdir($categoriaFolderPath);
             }
+
+            // Eliminar la categoría
+            $query = "DELETE FROM categorias WHERE id = :id";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute([':id' => $idCategoria]);
+
+            return true;
         }
 
-        // Eliminar el apartado (sus entregas se eliminan por ON DELETE CASCADE)
-        $query = "DELETE FROM apartados WHERE id = :idApartado";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->execute([':idApartado' => $idApartado]);
-
-        return true;
+        return false;
 
     } catch (PDOException $e) {
-        echo "Error al eliminar el apartado: " . $e->getMessage();
+        echo "Error al eliminar la categoría: " . $e->getMessage();
         return false;
     }
 }
+
 
 
 /**
