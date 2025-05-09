@@ -47,68 +47,164 @@ if (!validateToken()) {
 function handleGet($db) {
     try {
         if (isset($_GET['accion'])) {
+
             if ($_GET['accion'] == 'getUnDoneTasks') {
 
                 $response = $db->getUnDoneTareas();
 
-                if(!$response){
+                if (!$response) {
                     response(200, [
                         'success' => false,
-                        'error' => 'Error al obtener las tareas e el servidor'
+                        'error' => 'Error al obtener las tareas en el servidor'
                     ]);
-                }
-                else{
+                } else {
                     response(200, [
                         'success' => true,
                         'tasks' => $response
                     ]);
                 }
-                
+
+            } elseif ($_GET['accion'] == 'getTasksByCategoriaId') {
+
+                if (!isset($_GET['categoria_id'])) {
+                    response(200, [
+                        'success' => false,
+                        'error' => 'Falta el parámetro id'
+                    ]);
+                    return;
+                }
+
+                $categoriaId = intval($_GET['categoria_id']);
+                $response = $db->getTasksByCategoriaId($categoriaId);
+
+                if (!$response) {
+                    response(200, [
+                        'success' => false,
+                        'error' => 'No se pudieron obtener las tareas por categoría'
+                    ]);
+                } else {
+                    response(200, [
+                        'success' => true,
+                        'tasks' => $response
+                    ]);
+                }
+
             } else {
                 response(200, [
                     'success' => false,
-                    'error' => 'accion not allowed'
+                    'error' => 'Acción no permitida'
                 ]);
             }
-        } else {
 
+        } else {
             response(200, [
                 'success' => false,
-                'error' => 'accion not provided'
+                'error' => 'No se proporcionó ninguna acción'
             ]);
-            
         }
+
     } catch (Exception $e) {
         response(200, [
             'success' => false,
-            'error' => 'Error al obtener las tasks: ' . $e->getMessage()
+            'error' => 'Error al procesar la solicitud: ' . $e->getMessage()
         ]);
     }
 }
 
 
 
+
 /**
- * Manejo de solicitudes POST (Registro de usuario)
+ * Manejo de solicitudes POST
  */
 function handlePost($db) {
-    
-    response(500, ['error' => 'Post not developed']);
+   
+        $data = getRequestData();
+        
+        if (!isset($data['nombreTarea'], $data['fechaLimite'], $data['cursoId'], $data['categoriaId'])) {
+            response(200, ['error' => 'Faltan parámetros']);
+        } else {
+            try {
+                $response = $db->insertTarea($data['nombreTarea'], $data['fechaLimite'], $data['cursoId'], $data['categoriaId']);
+                
+                if ($response) {
+                    response(200, [
+                        "success" => true,
+                        "message" => "Tarea creado con éxito"
+                    ]);
+                } else {
+                    response(200, [
+                        "success" => false,
+                        "error" => "Error en la bd al insertar el tarea"
+                    ]);
+                }
+            
+            } catch (Exception $e) {
+                response(500, [
+                    "success" => false,
+                    "error" => 'Error al procesar la solicitud: ' . $e->getMessage()
+                ]);
+            }
+        }
     
 }
 
+
 /**
- * Manejo de solicitudes PUT (Actualizar usuario)
+ * Manejo de solicitudes PUT
  */
 function handlePut($db) {
-    response(500, ['error' => 'Put not developed']);
+    $data = getRequestData();
+    
+
+        if (empty($data)) {
+            response(400, [
+                'success' => false,
+                'error' => 'noDataProvided'
+            ]);
+        return; 
+        }
+
+        $Id = $data['id'];
+
+        if (isset($data['nombreTarea'])) {
+            $response = $db->updateTarea($Id ,$data['nombreTarea'], $data['fechaLimite']);
+
+            if($response){
+                response(200, [
+                    'success' => true,
+                    'message' => 'taskCorrectlyUpdated'
+                ]);
+            }else{
+                response(200, [
+                    'success' => false,
+                    'error' => 'taskNotUpdated'
+                ]);
+            }
+        }
 }
 
 /**
  * Manejo de solicitudes DELETE (Eliminar usuario)
  */
 function handleDelete($db) {
-    response(500, ['error' => 'Delete not developed']);
+    if (!isset($_GET['accion'])) {
+        response(200, ['error' => 'Falta accion']);
+    }
+
+    if($_GET["accion"] == "deleteTask"){
+        $taskId = intval($_GET['id']);
+
+        $taskDeleted = $db->deleteTask($taskId);
+            if ($taskDeleted) {
+                response(200, ['success' => true, 'message' => 'Documento eliminado correctamente.']);
+            } else {
+                response(200, ['success' => false, 'error' => 'Error al eliminar el documento de la BD.']);
+            }
+
+    }else{
+        response(200, ['success' => false, 'error' => 'No se ha espicificado accion']);
+    }
 }
 
 /**
