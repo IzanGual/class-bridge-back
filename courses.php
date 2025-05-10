@@ -115,45 +115,77 @@ function handleGet($db) {
  * Manejo de solicitudes POST (Registro de usuario o subida de imagen)
  */
 function handlePost($db) {
+    if (!isset($_POST['accion'])) {
+        response(500, ["success" => false, "error" => "Debes proporcionar acción"]);
+        return;
+    }
 
-    if (isset($_POST['accion'])) {
-        $accion = $_POST['accion'];
+    $accion = $_POST['accion'];
 
-        if ($accion === 'uploadCourse') {
-            if (isset($_FILES['imagen'])) {
-                $imageUrl = handleImageUpload($db);
-                if (!$imageUrl) {
-                    response(500, ['success' => false, 'error' => 'Error al subir la imagen.']);
-                    return;
-                }
-            }
-
-            
-
-            // Verificar que se envíen los demás datos necesarios
-            if (!isset($_POST['id'], $_POST['courseName'], $_POST['courseUsers'])) {
-                response(400, ['success' => false, 'error' => 'Faltan datos del curso']);
+    if ($accion === 'uploadCourse') {
+        if (isset($_FILES['imagen'])) {
+            $imageUrl = handleImageUpload($db);
+            if (!$imageUrl) {
+                response(500, ['success' => false, 'error' => 'Error al subir la imagen.']);
                 return;
             }
+        }
 
-
-            // Llamar al método que actualiza el curso
-            $success = $db->uploadCourse($_POST['id'], $_POST['courseName'], $_POST['courseUsers']);
-
-            if ($success) {
-                response(200, [
-                    "success" => true,
-                    "message" => "Curso actualizado correctamente"
-                ]);
-            } else {
-                response(500, ["success" => false, "error" => "Error al actualizar el curso en la base de datos."]);
-            }
+        if (!isset($_POST['id'], $_POST['courseName'], $_POST['courseUsers'])) {
+            response(400, ['success' => false, 'error' => 'Faltan datos del curso']);
             return;
         }
+
+        $success = $db->uploadCourse($_POST['id'], $_POST['courseName'], $_POST['courseUsers']);
+
+        if ($success) {
+            response(200, [
+                "success" => true,
+                "message" => "Curso actualizado correctamente"
+            ]);
+        } else {
+            response(500, ["success" => false, "error" => "Error al actualizar el curso en la base de datos."]);
+        }
+
+    } elseif ($accion === 'createCourse') {
+    if (!isset($_POST['courseName'], $_POST['courseUsers'], $_POST['aulaId'])) {
+        response(200, ['success' => false, 'error' => 'Faltan datos para crear el curso']);
+        return;
     }
-    else{
-        response(500, ["success" => false, "error" => "Debes proporcionar accion"]);
+
+    $cursoID = $db->createCourse($_POST['courseName'], $_POST['courseUsers'], $_POST['aulaId']);
+
+    if ($cursoID) {
+        if (isset($_FILES['imagen'])) {
+            $imageUrl = handleImageUpload($db, $cursoID);
+            if (!$imageUrl) {
+                response(200, ['success' => false, 'error' => 'Curso creado, pero falló la subida de la imagen.']);
+                return;
+            } else {
+                response(200, [
+                    "success" => true,
+                    "message" => "Curso creado correctamente y se subió la imagen",
+                    "id" => $cursoID
+                ]);
+                return;
+            }
+        }
+
+        // Si no se envió imagen
+        response(200, [
+            "success" => true,
+            "message" => "Curso creado correctamente sin imagen",
+            "id" => $cursoID
+        ]);
+        return;
+
+    } else {
+        response(500, ["success" => false, "error" => "Error al crear el curso en la base de datos."]);
+        return;
     }
+    }else {
+            response(400, ["success" => false, "error" => "Acción no reconocida"]);
+        }
 }
 
 /**
@@ -219,61 +251,67 @@ function getRequestData() {
 /**
  * Manejo de la subida de imágenes
  */
-function handleImageUpload($db) {
-    // Verifica si se recibió el archivo y el ID del curso
-    if (!isset($_FILES['imagen']) || !isset($_POST['id'])) {
-        response(200, ['success' => false, 'error' => 'Falta la imagen o el ID del curso.']);
+function handleImageUpload($db, $courseId = null) {
+    // Si no se pasa como parámetro, lo buscamos en $_POST
+    if (!$courseId && isset($_POST['id'])) {
+        $courseId = $_POST['id'];
     }
 
-    $courseId = $_POST['id'];
+    // Verificar si hay imagen y ID de curso
+    if (!isset($_FILES['imagen']) || !$courseId) {
+        response(400, ['success' => false, 'error' => 'Falta la imagen o el ID del curso.']);
+        return false;
+    }
+
     $uploadDir = "uploads/courses/$courseId/";
 
-    // Crear la carpeta si no existe
+    // Crear carpeta si no existe
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
 
-    // Obtener la extensión del archivo
     $imageFileType = strtolower(pathinfo($_FILES["imagen"]["name"], PATHINFO_EXTENSION));
 
-    // Validar si el archivo es una imagen
+    // Validar si es imagen
     $check = getimagesize($_FILES["imagen"]["tmp_name"]);
     if ($check === false) {
         response(400, ['success' => false, 'error' => 'El archivo no es una imagen válida.']);
+        return false;
     }
 
-    // Validar el tamaño del archivo (máximo 5 MB)
+    // Validar tamaño
     if ($_FILES["imagen"]["size"] > 5000000) {
         response(400, ['success' => false, 'error' => 'El archivo es demasiado grande. Máximo 5MB.']);
+        return false;
     }
 
-    // Validar tipos de archivos permitidos
+    // Validar extensión
     $allowedExtensions = ["jpg", "jpeg", "png", "gif"];
     if (!in_array($imageFileType, $allowedExtensions)) {
         response(400, ['success' => false, 'error' => 'Solo se permiten imágenes JPG, JPEG, PNG y GIF.']);
+        return false;
     }
 
-    // Definir el nombre de archivo
+    // Guardar archivo
     $filePath = $uploadDir . "banner." . $imageFileType;
-
-    // Mover la imagen a la carpeta
     if (!move_uploaded_file($_FILES["imagen"]["tmp_name"], $filePath)) {
         response(500, ['success' => false, 'error' => 'Error al mover el archivo.']);
+        return false;
     }
 
-    // Generar la URL pública de la imagen
+    // Generar URL de imagen
     $ip_servidor = gethostbyname(gethostname());
     $imageUrl = "http://$ip_servidor/classbridgeapi/" . $filePath;
 
-    // Actualizar en la base de datos
-    $response = $db->updateCourseBanner($courseId, $imageUrl);
-    if (!$response) {
+    // Guardar en BD
+    if (!$db->updateCourseBanner($courseId, $imageUrl)) {
         response(500, ['success' => false, 'error' => 'Error al insertar la URL en la base de datos.']);
+        return false;
     }
 
-    // Éxito: devolvemos la URL
     return $imageUrl;
 }
+
 
 function handleBannerDeletion($db, $courseId) {
     // Definir la URL de la imagen predeterminada

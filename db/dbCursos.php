@@ -184,6 +184,63 @@ public function uploadCourse($idCurso, $nombreCurso, $usuarios) {
 }
 
 
+
+/**
+ * Crea un nuevo curso en la base de datos.
+ *
+ * Inserta un nuevo curso con su nombre, aula asociada y usuarios relacionados.
+ *
+ * @param string $nombreCurso Nombre del curso a crear.
+ * @param array|string $usuarios Lista de IDs de usuarios (array o string separado por comas).
+ * @param int $aulaId ID del aula asociada al curso.
+ *
+ * @return bool `true` si se creó correctamente, `false` si hubo un error.
+ */
+public function createCourse($nombreCurso, $usuarios, $aulaId) {
+    try {
+        if (is_string($usuarios) && $usuarios !== 'noUsers') {
+            $usuarios = explode(',', $usuarios);
+        }
+
+        $this->pdo->beginTransaction();
+
+        // Insertar curso
+        $queryCurso = "INSERT INTO cursos (nombre, aula_id) VALUES (:nombre, :aulaId)";
+        $stmtCurso = $this->pdo->prepare($queryCurso);
+        $stmtCurso->execute([
+            ':nombre' => $nombreCurso,
+            ':aulaId' => $aulaId
+        ]);
+
+        $cursoId = $this->pdo->lastInsertId();
+
+        // Insertar usuarios
+        if (is_array($usuarios)) {
+            $queryUsuarios = "INSERT INTO usuarios_cursos (usuario_id, curso_id) VALUES (:usuario_id, :curso_id)";
+            $stmtUsuarios = $this->pdo->prepare($queryUsuarios);
+            foreach ($usuarios as $usuarioId) {
+                if (is_numeric($usuarioId)) {
+                    $stmtUsuarios->execute([
+                        ':usuario_id' => $usuarioId,
+                        ':curso_id' => $cursoId
+                    ]);
+                }
+            }
+        }
+
+        $this->pdo->commit();
+        return $cursoId;
+
+    } catch (PDOException $e) {
+        $this->pdo->rollBack();
+        return false;
+    }
+}
+
+
+
+
+
 /**
  * Actualiza la imagen del usuario en la base de datos.
  *
@@ -256,17 +313,16 @@ public function getCourseBanner($id)
  */
 public function deleteCourse($courseId) 
 {
-    // Obtenemos la ruta de la carpeta del curso
     $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/" . $courseId;
 
-    // Iniciamos la transacción para eliminar de forma segura
     $this->pdo->beginTransaction();
 
     try {
-        // Eliminar entregas relacionadas con las categorías de este curso
-        $query = "DELETE e FROM entregas e
-                  INNER JOIN categorias c ON e.categoria_id = c.id
-                  WHERE c.curso_id = :courseId";
+        // Eliminar tareas relacionadas con las categorías de este curso
+        $query = "DELETE FROM tareas 
+                  WHERE categoria_id IN (
+                      SELECT id FROM categorias WHERE curso_id = :courseId
+                  )";
         $stmt = $this->pdo->prepare($query);
         $stmt->execute([':courseId' => $courseId]);
 
@@ -275,14 +331,10 @@ public function deleteCourse($courseId)
         $stmt = $this->pdo->prepare($query);
         $stmt->execute([':courseId' => $courseId]);
 
-        // Eliminar todos los archivos dentro de la carpeta del curso
-        // Eliminar todos los archivos dentro de la carpeta del curso
+        // Eliminar archivos y carpeta del curso
         if (is_dir($courseFolderPath)) {
             $this->deleteDirectoryContents($courseFolderPath);
             rmdir($courseFolderPath);
-            //echo("La carpeta : $courseFolderPath");
-        } else {
-            //echo("La carpeta no existe: $courseFolderPath");
         }
 
         // Eliminar el curso de la base de datos
@@ -290,7 +342,6 @@ public function deleteCourse($courseId)
         $stmt = $this->pdo->prepare($query);
         $stmt->execute([':id' => $courseId]);
 
-        // Confirmamos la transacción
         $this->pdo->commit();
         return true;
 
@@ -300,6 +351,8 @@ public function deleteCourse($courseId)
         return false;
     }
 }
+
+
 /**
  * Elimina todos los archivos dentro de un directorio y luego el directorio.
  *
