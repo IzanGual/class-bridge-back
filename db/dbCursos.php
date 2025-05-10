@@ -325,6 +325,65 @@ private function deleteDirectoryContents($dir)
     }
 }
 
+/**
+ * Obtiene toda la información de un curso: apartados, categorías, documentos y entregas.
+ *
+ * @param int $id ID del curso.
+ * @return array|false Información del curso completa o false en caso de error o si no se encuentra.
+ */
+public function getFullCourseInfo($id)
+{
+    try {
+        // Obtener datos del curso
+        $queryCurso = "SELECT * FROM cursos WHERE id = :id";
+        $stmtCurso = $this->pdo->prepare($queryCurso);
+        $stmtCurso->execute([':id' => $id]);
+        $curso = $stmtCurso->fetch(PDO::FETCH_ASSOC);
+
+        if (!$curso) {
+            return false;
+        }
+
+        // Obtener apartados del curso
+        $queryApartados = "SELECT * FROM apartados WHERE curso_id = :curso_id";
+        $stmtApartados = $this->pdo->prepare($queryApartados);
+        $stmtApartados->execute([':curso_id' => $id]);
+        $apartados = $stmtApartados->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($apartados as &$apartado) {
+            // Obtener categorías del apartado
+            $queryCategorias = "SELECT * FROM categorias WHERE apartado_id = :apartado_id";
+            $stmtCategorias = $this->pdo->prepare($queryCategorias);
+            $stmtCategorias->execute([':apartado_id' => $apartado['id']]);
+            $categorias = $stmtCategorias->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($categorias as &$categoria) {
+                // Documentos de la categoría
+                $queryDocs = "SELECT * FROM documentos WHERE categoria_id = :categoria_id";
+                $stmtDocs = $this->pdo->prepare($queryDocs);
+                $stmtDocs->execute([':categoria_id' => $categoria['id']]);
+                $categoria['documentos'] = $stmtDocs->fetchAll(PDO::FETCH_ASSOC);
+
+                // Tareas de la categoría
+                $queryTareas = "SELECT * FROM tareas WHERE categoria_id = :categoria_id";
+                $stmtTareas = $this->pdo->prepare($queryTareas);
+                $stmtTareas ->execute([':categoria_id' => $categoria['id']]);
+                $categoria['tareas'] = $stmtTareas->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            $apartado['categorias'] = $categorias;
+        }
+
+        $curso['apartados'] = $apartados;
+        return $curso;
+
+    } catch (PDOException $e) {
+        // error_log("Error al obtener la información completa del curso: " . $e->getMessage());
+        return false;
+    }
+}
+
+
 
 
 

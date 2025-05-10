@@ -80,6 +80,22 @@ function handleGet($db) {
             return; 
         }
 
+        if (isset($_GET['getFullCourseInfo_id'])) {
+            $course = $db->getFullCourseInfo($_GET['getFullCourseInfo_id']);
+            if ($course) {
+                response(200, [
+                    'success' => true,
+                    'full_course_info' => $course
+                ]);
+            } else {
+                response(200, [
+                    'success' => false,
+                    'error' => 'No se encontraron cursos para el aula'
+                ]);
+            }
+            return; 
+        }
+
         
         response(400, [
             'success' => false,
