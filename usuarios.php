@@ -223,10 +223,41 @@ function handlePost($db) {
         handleImageUpload($db);
     } else {
         $data = getRequestData();
-        
+
         if (!isset($data['nombre'], $data['email'], $data['contraseña'])) {
             response(400, ['error' => 'Faltan parámetros']);
-        } else {
+        } 
+        // Si también llegan cursos y aula_id, hacer otra cosa
+        else if (isset($data['cursos']) && isset($data['aula_id'])) {
+            
+             try {
+                $response = $db->registerStudent($data['nombre'], $data['email'], $data['contraseña'], $data['cursos'], $data['aula_id']);
+                
+                if ($response === true) {
+                    response(200, [
+                        "success" => true,
+                        "message" => "Usuario creado con éxito"
+                    ]);
+                } else {
+                    response(200, [
+                        "success" => false,
+                        "error" => $response['error']
+                    ]);
+                }
+
+            } catch (Exception $e) {
+                response(500, [
+                    "success" => false,
+                    "error" => 'Error al procesar la solicitud: ' . $e->getMessage()
+                ]);
+            }
+
+
+
+
+        } 
+        // Si solo llegaron los datos del usuario, hacer el registro
+        else {
             try {
                 $response = $db->registerUser($data['nombre'], $data['email'], $data['contraseña']);
                 
@@ -241,7 +272,7 @@ function handlePost($db) {
                         "error" => $response['error']
                     ]);
                 }
-            
+
             } catch (Exception $e) {
                 response(500, [
                     "success" => false,
@@ -251,6 +282,7 @@ function handlePost($db) {
         }
     }
 }
+
 
 
 /**

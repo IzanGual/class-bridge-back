@@ -69,6 +69,78 @@ public function registerUser($nombre, $email, $pass)
             return ['error' => 'Error al registrar usuario: ' . $e->getMessage()];
         }
 }
+
+
+/*
+ * Registra un nuevo estudiante y lo vincula a varios cursos.
+ *
+ * @param string $nombre Nombre del estudiante.
+ * @param string $email Email del estudiante.
+ * @param string $pass Contraseña sin encriptar.
+ * @param array $cursos Array con los IDs de los cursos.
+ * @param int $aula_id ID del aula.
+ *
+ * @return bool|array `true` si fue exitoso, o array con clave 'error' si hubo problema.
+ */
+public function registerStudent($nombre, $email, $pass, $cursos, $aula_id) 
+{
+    // Comprobar si el email ya existe
+    $checkStmt = $this->pdo->prepare("SELECT * FROM usuarios WHERE email = :email");
+    $checkStmt->execute([':email' => $email]);
+    $existingUser = $checkStmt->fetch();
+
+    if ($existingUser) {
+        return ['error' => 'emailDup'];
+    }
+
+    $tipo = "estudiante";
+    $hashedPassword = password_hash($pass, PASSWORD_BCRYPT);
+
+    try {
+        // Iniciar transacción
+        $this->pdo->beginTransaction();
+
+        // Insertar nuevo usuario
+        $stmt = $this->pdo->prepare("
+            INSERT INTO usuarios (nombre, email, pass, tipo, aulaId) 
+            VALUES (:nombre, :email, :pass, :tipo, :aula_id)
+        ");
+        $stmt->execute([
+            ':nombre' => $nombre,
+            ':email' => $email,
+            ':pass' => $hashedPassword,
+            ':tipo' => $tipo,
+            ':aula_id' => $aula_id
+        ]);
+
+        // Obtener el ID del usuario insertado
+        $usuario_id = $this->pdo->lastInsertId();
+
+        // Insertar relaciones en la tabla usuarios_cursos
+        $relStmt = $this->pdo->prepare("
+            INSERT INTO usuarios_cursos (usuario_id, curso_id) 
+            VALUES (:usuario_id, :curso_id)
+        ");
+
+        foreach ($cursos as $curso_id) {
+            $relStmt->execute([
+                ':usuario_id' => $usuario_id,
+                ':curso_id' => $curso_id
+            ]);
+        }
+
+        // Confirmar la transacción
+        $this->pdo->commit();
+
+        return true;
+
+    } catch (PDOException $e) {
+        // Revertir si hay error
+        $this->pdo->rollBack();
+        return ['error' => 'Error al registrar estudiante: ' . $e->getMessage()];
+    }
+}
+
     
 
 
