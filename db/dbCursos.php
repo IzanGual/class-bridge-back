@@ -438,8 +438,27 @@ public function getFullCourseInfo($id)
 
 
 
+/**
+ * Obtiene los IDs de los cursos asociados a un usuario.
+ *
+ * @param int $userId ID del usuario.
+ * @return array Array con los IDs de cursos o array vacío si no hay cursos asociados.
+ */
+public function getCoursesByUserId($userId)
+{
+    try {
+        $query = "SELECT curso_id FROM usuarios_cursos WHERE usuario_id = :usuario_id";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':usuario_id' => $userId]);
 
-
+        $result = $stmt->fetchAll(PDO::FETCH_COLUMN, 0); // Extrae solo los valores de la columna curso_id
+        return $result ?: []; // Devuelve un array vacío si no hay resultados
+    } catch (PDOException $e) {
+        // Puedes loguear el error si lo necesitas
+        // error_log("Error al obtener cursos del usuario: " . $e->getMessage());
+        return false;
+    }
+}
 
 
 

@@ -96,6 +96,23 @@ function handleGet($db) {
             return; 
         }
 
+        if (isset($_GET['getCoursesByUserId_id'])) {
+            $courses = $db->getCoursesByUserId($_GET['getCoursesByUserId_id']);
+            if ($courses) {
+                response(200, [
+                    'success' => true,
+                    'courses' => $courses
+                ]);
+            } else {
+                response(200, [
+                    'success' => false,
+                    'error' => 'No se encontraron cursos para el aula'
+                ]);
+            }
+            return; 
+        }
+
+
         
         response(400, [
             'success' => false,

@@ -158,6 +158,22 @@ function handlePut($db) {
             }
         }
 
+        if (isset($data['cursos'])) {
+            $response = $db->updateStudent($data['id'] ,$data['nombre'], $data['correo'], $data['pass'], $data['cursos']);
+
+            if (is_array($response) && isset($response['error'])) {
+                response(200, [
+                    "success" => false,
+                    "error" => $response['error']
+                ]);
+            } else {
+                response(200, [
+                    'success' => true,
+                    'message' => 'passSuccessfullyUpdated'
+                ]);
+            }
+        }
+
         if (isset($data['pass'])) {
             $response = $db->updateUserPass($userId ,$data['pass']);
 
@@ -309,6 +325,15 @@ function handleDelete($db) {
     }else if($_GET["action"] == "deleteUserProfile"){
 
         $deleted =  $db->deleteUserProfile($userId);
+        if ($deleted) {
+            response(200, ['success' => true, 'message' => 'Prifile succesfully deleted']);
+        } else {
+            response(200, ['success' => false, 'error' => $response['error']]);
+        }
+
+    }else if($_GET["action"] == "deleteStudentProfile"){
+
+        $deleted =  $db->deleteUserProfile($_GET["student_id"]);
         if ($deleted) {
             response(200, ['success' => true, 'message' => 'Prifile succesfully deleted']);
         } else {

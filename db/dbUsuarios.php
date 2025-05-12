@@ -93,7 +93,7 @@ public function registerStudent($nombre, $email, $pass, $cursos, $aula_id)
         return ['error' => 'emailDup'];
     }
 
-    $tipo = "estudiante";
+    $tipo = "alumno";
     $hashedPassword = password_hash($pass, PASSWORD_BCRYPT);
 
     try {
@@ -452,6 +452,71 @@ public function updateUserMail($idUsuario, $mail)
             return ['error' => 'NotPosibleToUpdateEmail'];
         }
 }
+
+/**
+ * Actualiza los datos de un estudiante, incluyendo sus cursos asociados.
+ *
+ * @param int $id ID del usuario.
+ * @param string $nombre Nombre del usuario.
+ * @param string $correo Correo electrónico del usuario.
+ * @param string $pass Contraseña del usuario (en texto plano o ya cifrada).
+ * @param array $cursos Lista de IDs de cursos.
+ * @return true|array Retorna true si fue exitoso, o un array con el error.
+ */
+public function updateStudent($id, $nombre, $correo, $pass, $cursos) {
+    try {
+        // Verificar si el correo ya está en uso por otro usuario
+        $checkStmt = $this->pdo->prepare("SELECT id FROM usuarios WHERE email = :email AND id != :id");
+        $checkStmt->execute([
+            ':email' => $correo,
+            ':id' => $id
+        ]);
+        $existing = $checkStmt->fetch();
+
+        if ($existing) {
+            return ['error' => 'emailDup'];
+        }
+
+        // Armar dinámicamente la consulta de actualización
+        $query = "UPDATE usuarios SET nombre = :nombre, email = :email";
+        $params = [
+            ':nombre' => $nombre,
+            ':email' => $correo,
+            ':id' => $id
+        ];
+
+        if (!empty($pass)) {
+            $query .= ", pass = :pass";
+            $params[':pass'] = password_hash($pass, PASSWORD_DEFAULT);
+        }
+
+        $query .= " WHERE id = :id";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($params);
+
+        // Solo modificar los cursos si $cursos es un array no vacío
+        if (is_array($cursos) && count($cursos) > 0) {
+            // Eliminar cursos anteriores del usuario
+            $deleteCursos = $this->pdo->prepare("DELETE FROM usuarios_cursos WHERE usuario_id = :id");
+            $deleteCursos->execute([':id' => $id]);
+
+            // Insertar nuevos cursos
+            $insertCurso = $this->pdo->prepare("INSERT INTO usuarios_cursos (usuario_id, curso_id) VALUES (:usuario_id, :curso_id)");
+            foreach ($cursos as $cursoId) {
+                $insertCurso->execute([
+                    ':usuario_id' => $id,
+                    ':curso_id' => $cursoId
+                ]);
+            }
+        }
+
+        return true;
+
+    } catch (PDOException $e) {
+        return ['error' => 'dbError'];
+    }
+}
+
 
 
 
