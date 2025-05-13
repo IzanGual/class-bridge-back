@@ -10,10 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require 'db/dbTareas.php';
+require 'db/dbEntregas.php';
 require 'auth/jwtHelper.php'; // Archivo con funciones de JWT
 
-$db = new dbTareas();
+$db = new dbEntregas();
+
 
 $method = $_SERVER['REQUEST_METHOD'];
 if (!validateToken()) {
@@ -48,11 +49,13 @@ function handleGet($db) {
     try {
         if (isset($_GET['accion'])) {
 
-            if ($_GET['accion'] == 'getUnDoneTasks') {
+            if ($_GET['accion'] == 'getEntregas') {
 
-                $response = $db->getUnDoneTareas();
+                $usuario_id = $_GET['usuario_id'] ?? null;
+                $tarea_id = $_GET['tarea_id'] ?? null;
 
-                if (!$response) {
+                $response = $db->getEntregas($usuario_id, $tarea_id);
+                if ($response === false) {
                     response(200, [
                         'success' => false,
                         'error' => 'Error al obtener las tareas en el servidor'
@@ -60,65 +63,18 @@ function handleGet($db) {
                 } else {
                     response(200, [
                         'success' => true,
-                        'tasks' => $response
+                        'entregas' => $response
                     ]);
                 }
 
-            } elseif ($_GET['accion'] == 'getTasksByCategoriaId') {
-
-                if (!isset($_GET['categoria_id'])) {
-                    response(200, [
-                        'success' => false,
-                        'error' => 'Falta el parámetro id'
-                    ]);
-                    return;
-                }
-
-                $categoriaId = intval($_GET['categoria_id']);
-                $response = $db->getTasksByCategoriaId($categoriaId);
-
-                if (!$response) {
-                    response(200, [
-                        'success' => false,
-                        'error' => 'No se pudieron obtener las tareas por categoría'
-                    ]);
-                } else {
-                    response(200, [
-                        'success' => true,
-                        'tasks' => $response
-                    ]);
-                }
-
-            }elseif ($_GET['accion'] == 'getTasks') {
-
-                    $response = $db->getTasks();
-
-                if (!$response) {
-                    response(200, [
-                        'success' => false,
-                        'error' => 'No se pudieron obtener las tareas'
-                    ]);
-                } else {
-                    response(200, [
-                        'success' => true,
-                        'tasks' => $response
-                    ]);
-                }
-
-            } else {
-                response(200, [
-                    'success' => false,
-                    'error' => 'Acción no permitida'
-                ]);
-            }
-
-        } else {
+            }else {
             response(200, [
                 'success' => false,
                 'error' => 'No se proporcionó ninguna acción'
             ]);
         }
 
+    }
     } catch (Exception $e) {
         response(200, [
             'success' => false,

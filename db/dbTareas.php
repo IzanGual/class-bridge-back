@@ -47,6 +47,25 @@ public function getUnDoneTareas()
     }
 }
 
+/**
+ * Obtiene todas las tareas desde la base de datos.
+ *
+ * @return array|false Un array asociativo con todas las tareas (puede ser vacío),
+ *                     o `false` en caso de error.
+ */
+public function getTasks()
+{
+    try {
+        $stmt = $this->pdo->prepare("SELECT * FROM tareas");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+
+
 
 /**
  * Inserta una nueva tarea en la base de datos.
