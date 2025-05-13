@@ -60,4 +60,66 @@ public function getEntregas($alumno_id = null, $tarea_id = null)
     return false;
 }
 }
+
+/**
+ * Obtiene una entrega específica por su ID.
+ *
+ * @param int $id ID de la entrega
+ * @return array|false Datos de la entrega o false si hay error
+ */
+public function getEntregaById($id)
+{
+    try {
+        $sql = "
+            SELECT 
+                e.*, 
+                u.nombre AS nombre_alumno, 
+                t.nombre AS nombre_tarea,
+                t.fecha_limite AS fecha_limite_tarea
+            FROM entregas e
+            JOIN usuarios u ON e.alumno_id = u.id
+            JOIN tareas t ON e.tarea_id = t.id
+            WHERE e.id = :id
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC); // fetch() en lugar de fetchAll() porque es solo una
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+/**
+ * Corrige una entrega actualizando la nota, el comentario y el estado de corrección.
+ *
+ * @param int $id ID de la entrega
+ * @param string $nota Nota asignada
+ * @param string $comentario Comentario del profesor
+ * @return bool true si la actualización fue exitosa, false en caso contrario
+ */
+public function correctEntrega($id, $nota, $comentario)
+{
+    try {
+        $sql = "
+            UPDATE entregas
+            SET 
+                nota = :nota,
+                comentario = :comentario,
+                estado_correccion = 'corregida'
+            WHERE id = :id
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            ':nota' => $nota,
+            ':comentario' => $comentario,
+            ':id' => $id
+        ]);
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
 }

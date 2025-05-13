@@ -58,12 +58,28 @@ function handleGet($db) {
                 if ($response === false) {
                     response(200, [
                         'success' => false,
-                        'error' => 'Error al obtener las tareas en el servidor'
+                        'error' => 'Error al obtener las entregas en el servidor'
                     ]);
                 } else {
                     response(200, [
                         'success' => true,
                         'entregas' => $response
+                    ]);
+                }
+
+            }elseif ($_GET['accion'] == 'getEntregaById') {
+
+
+                $response = $db->getEntregaById($_GET['id']);
+                if ($response === false) {
+                    response(200, [
+                        'success' => false,
+                        'error' => 'Error al obtener las entrega'
+                    ]);
+                } else {
+                    response(200, [
+                        'success' => true,
+                        'entrega' => $response
                     ]);
                 }
 
@@ -93,31 +109,7 @@ function handlePost($db) {
    
         $data = getRequestData();
         
-        if (!isset($data['nombreTarea'], $data['fechaLimite'], $data['cursoId'], $data['categoriaId'])) {
-            response(200, ['error' => 'Faltan parámetros']);
-        } else {
-            try {
-                $response = $db->insertTarea($data['nombreTarea'], $data['fechaLimite'], $data['cursoId'], $data['categoriaId']);
-                
-                if ($response) {
-                    response(200, [
-                        "success" => true,
-                        "message" => "Tarea creado con éxito"
-                    ]);
-                } else {
-                    response(200, [
-                        "success" => false,
-                        "error" => "Error en la bd al insertar el tarea"
-                    ]);
-                }
-            
-            } catch (Exception $e) {
-                response(500, [
-                    "success" => false,
-                    "error" => 'Error al procesar la solicitud: ' . $e->getMessage()
-                ]);
-            }
-        }
+     
     
 }
 
@@ -127,34 +119,67 @@ function handlePost($db) {
  */
 function handlePut($db) {
     $data = getRequestData();
-    
 
-        if (empty($data)) {
-            response(400, [
-                'success' => false,
-                'error' => 'noDataProvided'
-            ]);
-        return; 
-        }
+    if (empty($data)) {
+        response(400, [
+            'success' => false,
+            'error' => 'noDataProvided'
+        ]);
+        return;
+    }
 
-        $Id = $data['id'];
+    // Acción obligatoria
+    if (!isset($data['accion'])) {
+        response(400, [
+            'success' => false,
+            'error' => 'missingAction'
+        ]);
+        return;
+    }
 
-        if (isset($data['nombreTarea'])) {
-            $response = $db->updateTarea($Id ,$data['nombreTarea'], $data['fechaLimite']);
+    $accion = $data['accion'];
 
-            if($response){
-                response(200, [
-                    'success' => true,
-                    'message' => 'taskCorrectlyUpdated'
-                ]);
-            }else{
-                response(200, [
+    switch ($accion) {
+
+        case 'correctEntrega':
+            // Datos necesarios
+            if (!isset($data['entregaId'], $data['notaEntrega'], $data['comentarioEntrega'])) {
+                response(400, [
                     'success' => false,
-                    'error' => 'taskNotUpdated'
+                    'error' => 'missingEntregaData'
                 ]);
+                return;
             }
-        }
+
+            $success = $db->correctEntrega(
+                $data['entregaId'],
+                $data['notaEntrega'],
+                $data['comentarioEntrega']
+            );
+
+            if (!$success) {
+                    response(200, [
+                        'success' => false,
+                        'error' => 'Error al correct'
+                    ]);
+                } else {
+                    response(200, [
+                        'success' => true,
+                        'message' => 'Todo perfecto haciendo el correct'
+                    ]);
+                }
+            return;
+
+
+        default:
+            response(200, [
+                'success' => false,
+                'error' => 'unknownAction'
+            ]);
+            return;
+    }
 }
+
 
 /**
  * Manejo de solicitudes DELETE (Eliminar usuario)
