@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 09-05-2025 a las 20:53:47
+-- Tiempo de generación: 15-05-2025 a las 22:14:49
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -40,10 +40,20 @@ CREATE TABLE `apartados` (
 INSERT INTO `apartados` (`id`, `nombre`, `curso_id`) VALUES
 (8, 'apartado44b2intensive', 13),
 (9, 'apartado55b2intensive', 13),
-(12, 'aee', 14),
-(13, 'meme', 14),
 (14, 'b2megaintensivo', 13),
-(15, 'aaaaaa', 12);
+(15, 'aaaaaa', 12),
+(16, 'Tema1 (JavaScript)', 14),
+(17, 'Tema2(Responsividad)', 14),
+(18, 'Tema3(TypeScipt)', 14),
+(19, 'Tema3(TypeScipt)', 20),
+(23, 'nuevacatparadaph', 26),
+(24, 'aaaaaa', 26),
+(25, 'JS frameworks', 26),
+(26, 'daphiniApartado', 27),
+(27, 'DaphiniApartado', 27),
+(28, 'nuevacatparadaph', 28),
+(29, 'Tema3(TypeScipt)', 28),
+(34, 'cacacaca', 13);
 
 -- --------------------------------------------------------
 
@@ -54,17 +64,20 @@ INSERT INTO `apartados` (`id`, `nombre`, `curso_id`) VALUES
 CREATE TABLE `aulas` (
   `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
-  `profesor_id` int(11) NOT NULL
+  `profesor_id` int(11) NOT NULL,
+  `color` varchar(20) DEFAULT '247, 128, 98'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `aulas`
 --
 
-INSERT INTO `aulas` (`id`, `nombre`, `profesor_id`) VALUES
-(1, 'Matemáticas Avanzadas', 1),
-(2, 'Historia Universal', 2),
-(25, 'izan', 7);
+INSERT INTO `aulas` (`id`, `nombre`, `profesor_id`, `color`) VALUES
+(1, 'Matemáticas Avanzadas', 1, '247, 128, 98'),
+(2, 'Historia Universal', 2, '247, 128, 98'),
+(25, 'izan', 7, '247, 128, 98'),
+(26, 'caca', 19, '247, 128, 98'),
+(27, 'izanguma10', 20, '247, 128, 98');
 
 -- --------------------------------------------------------
 
@@ -111,8 +124,14 @@ INSERT INTO `categorias` (`id`, `entrega_id`, `nombre`, `curso_id`, `apartado_id
 (15, NULL, 'quea1234', 13, 8),
 (16, NULL, 'quea12345', 13, 8),
 (18, NULL, 'cacadebaca', 13, 14),
-(20, NULL, 'categoriaparaaeee', 14, 12),
-(22, NULL, 'nuevacatparadaph', 12, 15);
+(22, NULL, 'nuevacatparadaph', 12, 15),
+(23, NULL, 'JS Variables', 14, 16),
+(24, NULL, 'JS tipado', 14, 16),
+(25, NULL, 'JS frameworks', 14, 16),
+(26, NULL, 'CSS co JS', 14, 17),
+(27, NULL, 'Tipado dinámico con css', 14, 18),
+(28, NULL, 'Tipado con TypeScript sencillo', 14, 18),
+(34, NULL, 'Tema3(TypeScipt)', 28, 29);
 
 -- --------------------------------------------------------
 
@@ -125,6 +144,14 @@ CREATE TABLE `codigos_verificacion` (
   `codigo_verificacion` varchar(255) NOT NULL,
   `expiracion` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `codigos_verificacion`
+--
+
+INSERT INTO `codigos_verificacion` (`id_usuario`, `codigo_verificacion`, `expiracion`) VALUES
+(7, '638968', '2025-05-15 21:40:31'),
+(18, '148043', '2025-05-14 09:37:23');
 
 -- --------------------------------------------------------
 
@@ -147,7 +174,15 @@ INSERT INTO `cursos` (`id`, `nombre`, `aula_id`, `img_url`) VALUES
 (1, 'Álgebra y Cálculo', 1, 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png'),
 (12, 'CursoDeDaph', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/12/banner.png'),
 (13, 'B2 intesivo', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/13/banner.png'),
-(14, 'Curso3', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png');
+(14, 'Desarrollo de Aplicaciones Web', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/14/banner.png'),
+(19, 'IA paraAna', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png'),
+(20, 'BigData', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/20/banner.png'),
+(21, 'despliegue de cacas', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png'),
+(22, 'first', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png'),
+(23, 'porfiiin', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png'),
+(26, 'CursoDeDaphNuevo', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png'),
+(27, 'daphini', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png'),
+(28, 'cursoP', 25, 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png');
 
 -- --------------------------------------------------------
 
@@ -169,7 +204,10 @@ CREATE TABLE `documentos` (
 INSERT INTO `documentos` (`id`, `categoria_id`, `nombre`, `url`) VALUES
 (4, 22, 'izang', 'http://192.168.1.130/classbridgeapi/uploads/courses/12/apartados/15/categorias/22/documentos/izang.pdf'),
 (5, 22, 'izaguayy', 'http://192.168.1.130/classbridgeapi/uploads/courses/12/apartados/15/categorias/22/documentos/izaguayy.pdf'),
-(6, 22, 'pngf', 'http://192.168.1.130/classbridgeapi/uploads/courses/12/apartados/15/categorias/22/documentos/pngf.png');
+(6, 22, 'pngf', 'http://192.168.1.130/classbridgeapi/uploads/courses/12/apartados/15/categorias/22/documentos/pngf.png'),
+(8, 23, 'EnunciadoTareaVariables', 'http://192.168.1.130/classbridgeapi/uploads/courses/14/apartados/16/categorias/23/documentos/EnunciadoTareaVariables.pdf'),
+(9, 13, 'Horario', 'http://192.168.1.130/classbridgeapi/uploads/courses/13/apartados/8/categorias/13/documentos/Horario.pdf'),
+(10, 23, 'Ejercicio2eNUNCIADOD', 'http://192.168.1.130/classbridgeapi/uploads/courses/14/apartados/16/categorias/23/documentos/Ejercicio2eNUNCIADOD.pdf');
 
 -- --------------------------------------------------------
 
@@ -182,7 +220,7 @@ CREATE TABLE `entregas` (
   `tarea_id` int(11) NOT NULL,
   `alumno_id` int(11) NOT NULL,
   `comentario` text DEFAULT NULL,
-  `nota` decimal(4,2) DEFAULT NULL CHECK (`nota` >= 1 and `nota` <= 10),
+  `nota` decimal(4,2) DEFAULT NULL CHECK (`nota` >= 0 and `nota` <= 10),
   `estado` enum('entregada','noentregada') DEFAULT 'noentregada',
   `fecha_entrega` date DEFAULT NULL,
   `archivo_url` varchar(255) DEFAULT NULL,
@@ -194,10 +232,10 @@ CREATE TABLE `entregas` (
 --
 
 INSERT INTO `entregas` (`id`, `tarea_id`, `alumno_id`, `comentario`, `nota`, `estado`, `fecha_entrega`, `archivo_url`, `estado_correccion`) VALUES
-(1, 11, 11, NULL, NULL, 'entregada', '2025-05-09', '//AE', 'no_corregida'),
-(2, 11, 8, NULL, NULL, 'noentregada', '2025-05-09', '//AE', 'no_corregida'),
-(3, 11, 12, NULL, NULL, 'noentregada', '2025-05-09', '//AEe', 'no_corregida'),
-(4, 11, 13, NULL, NULL, 'noentregada', '2025-05-09', '//AEeeeeee', 'no_corregida');
+(1, 11, 11, 'Bro has copiado', 0.00, 'entregada', '2025-05-09', 'http://192.168.1.130/classbridgeapi/uploads/courses/12/apartados/15/categorias/22/documentos/izang.pdf', 'corregida'),
+(2, 11, 8, NULL, NULL, 'noentregada', NULL, '//AE', 'corregida'),
+(3, 11, 12, NULL, NULL, 'noentregada', NULL, '//AEe', 'no_corregida'),
+(4, 11, 13, NULL, NULL, 'noentregada', NULL, '//AEeeeeee', 'no_corregida');
 
 -- --------------------------------------------------------
 
@@ -240,7 +278,9 @@ INSERT INTO `pagos` (`id`, `usuario_id`, `monto`, `metodo_pago`, `estado`) VALUE
 (32, 7, 29.99, 'Tarjeta de credito', 'completado'),
 (33, 7, 29.99, 'Tarjeta de credito', 'completado'),
 (34, 7, 29.99, 'Tarjeta de credito', 'completado'),
-(35, 7, 29.99, 'Tarjeta de credito', 'completado');
+(35, 7, 29.99, 'Tarjeta de credito', 'completado'),
+(36, 19, 29.99, 'Tarjeta de credito', 'completado'),
+(37, 20, 29.99, 'Tarjeta de credito', 'completado');
 
 -- --------------------------------------------------------
 
@@ -285,8 +325,8 @@ CREATE TABLE `tareas` (
 
 INSERT INTO `tareas` (`id`, `categoria_id`, `nombre`, `fecha_limite`, `curso_id`) VALUES
 (11, 13, 'Entrega sexo', '2025-05-16', 13),
-(12, 22, 'Tarea de izan', '2025-05-18', 12),
-(13, 22, 'OPtra tarea de abimales en ingles', '2025-05-17', 12);
+(13, 22, 'OPtra tarea de abimales en ingles', '2025-05-17', 12),
+(16, 23, 'TareaVariables', '2025-05-17', 14);
 
 -- --------------------------------------------------------
 
@@ -313,12 +353,17 @@ INSERT INTO `usuarios` (`id`, `nombre`, `email`, `pass`, `tipo`, `estado_suscrip
 (1, 'Juan Pérez', 'juanperez@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'profesor', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', NULL),
 (2, 'María López', 'marialopez@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'profesor', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', NULL),
 (3, 'Carlos García', 'c@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'profesor', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 1),
-(4, 'Ana Martínez', 'a@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'alumno', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 25),
-(7, 'izangual', 'iesvda.izamar@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'profesor', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 25),
+(4, 'Ana Gual', 'ana@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'alumno', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 25),
+(7, 'izangual', 'iesvda.izamar@gmail.com', '$2y$10$28G0F.P1Z5OajnjTWyJdZeWJeAuqhRp8fYy1EPTYhkHBqeHTuA83O', 'profesor', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 25),
 (8, 'Bebe', 'b@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'alumno', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 25),
 (11, 'Dedededo', 'd@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'alumno', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 25),
 (12, 'caca', 'caca@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'alumno', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 25),
-(13, 'meoa', 'meoa@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'alumno', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 25);
+(13, 'meoa', 'meoa@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'alumno', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 25),
+(14, 'Daphini', 'daphini@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'alumno', 'pendiente', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png', 25),
+(17, 'Izan Gual', 'izangual@gmail.com', '$2y$10$6r.wt4AaZqzKbQM1741Y7evpDsWDhSLpCUcOvibpZkwZVTHciUjAe', 'alumno', 'pendiente', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png', 25),
+(18, 'Lucas', 'iesvda.lucrod@gmail.com', '$2y$10$AYmye0vNuQtPcG12ZCYn0OMfLl.HloBEyv7Ls1j0M6TFwDlkATGMa', 'normal', 'pendiente', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png', NULL),
+(19, 'caca', 'cacacacaca@gmail.com', '$2y$10$AX2wJC6NgfkArqPj8J.IZOIAMhB.FYsHq9X/iaQy0swdi9JeE1C.i', 'profesor', 'activo', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png', NULL),
+(20, 'izanhuma', 'izanguma10@gmail.com', '$2y$10$vKOv4ujXL0zTY2cfFBA.ROKCWeRQhOBPUqlkoXR25CKkCnV5feeO6', 'profesor', 'activo', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png', NULL);
 
 -- --------------------------------------------------------
 
@@ -338,16 +383,43 @@ CREATE TABLE `usuarios_cursos` (
 
 INSERT INTO `usuarios_cursos` (`id`, `usuario_id`, `curso_id`) VALUES
 (1, 3, 1),
-(116, 4, 12),
 (117, 8, 12),
 (118, 11, 12),
 (119, 12, 12),
 (120, 13, 12),
-(121, 4, 13),
 (122, 8, 13),
 (123, 11, 13),
 (124, 12, 13),
-(125, 13, 13);
+(125, 13, 13),
+(127, 8, 14),
+(128, 11, 14),
+(129, 12, 14),
+(130, 13, 14),
+(138, 8, 20),
+(139, 11, 20),
+(140, 12, 20),
+(141, 13, 20),
+(143, 8, 21),
+(144, 11, 21),
+(147, 11, 23),
+(148, 12, 23),
+(154, 8, 26),
+(155, 12, 27),
+(157, 8, 28),
+(161, 14, 12),
+(162, 14, 13),
+(163, 14, 14),
+(164, 14, 19),
+(165, 14, 22),
+(166, 14, 21),
+(167, 14, 20),
+(168, 14, 28),
+(169, 14, 27),
+(170, 14, 26),
+(171, 14, 23),
+(174, 17, 12),
+(175, 17, 13),
+(181, 4, 19);
 
 --
 -- Índices para tablas volcadas
@@ -459,13 +531,13 @@ ALTER TABLE `usuarios_cursos`
 -- AUTO_INCREMENT de la tabla `apartados`
 --
 ALTER TABLE `apartados`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT de la tabla `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT de la tabla `calendario`
@@ -477,31 +549,31 @@ ALTER TABLE `calendario`
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT de la tabla `cursos`
 --
 ALTER TABLE `cursos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT de la tabla `documentos`
 --
 ALTER TABLE `documentos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `entregas`
 --
 ALTER TABLE `entregas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT de la tabla `planes_servicio`
@@ -513,19 +585,19 @@ ALTER TABLE `planes_servicio`
 -- AUTO_INCREMENT de la tabla `tareas`
 --
 ALTER TABLE `tareas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios_cursos`
 --
 ALTER TABLE `usuarios_cursos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=126;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=182;
 
 --
 -- Restricciones para tablas volcadas

@@ -185,4 +185,61 @@ public function isTheTeacher($aulaId, $teacherId)
 }
 
 
+/**
+ * Actualiza el color de un aula específica.
+ *
+ * @param int $id ID del aula que se desea actualizar.
+ * @param string $color Nuevo valor para el campo color.
+ *
+ * @return bool Retorna true si la actualización fue exitosa, false en caso contrario.
+ */
+public function updateAulaColor($id, $color)
+{
+    try {
+        $stmt = $this->pdo->prepare("UPDATE aulas SET color = :color WHERE id = :id");
+        $stmt->bindParam(':color', $color, PDO::PARAM_STR);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+/**
+ * Verifica si ya existe un aula con el mismo nombre (excluyendo el aula actual).
+ *
+ * @param string $nombre Nombre del aula a verificar.
+ * @param int $id ID del aula actual (para excluirlo de la comprobación).
+ * @return bool True si ya existe, false si no.
+ */
+public function aulaNameExists($nombre, $id)
+{
+    try {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM aulas WHERE nombre = :nombre AND id != :id");
+        $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchColumn() > 0;
+    } catch (PDOException $e) {
+        return true; // En caso de error, mejor prevenir que permitir duplicados
+    }
+}
+
+public function updateAulaName($id, $nombre)
+{
+    try {
+        $stmt = $this->pdo->prepare("UPDATE aulas SET nombre = :nombre WHERE id = :id");
+        $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+
+
+
+
 }

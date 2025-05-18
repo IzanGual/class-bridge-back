@@ -1,8 +1,10 @@
 <?php
+// Configuración CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
+// Manejo de preflight request (CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
@@ -84,10 +86,76 @@ function handlePost($db) {
 }
 
 /**
- * Manejo de solicitudes PUT (Actualizar usuario)
+ * Manejo de solicitudes PUT
  */
 function handlePut($db) {
-    response(500, ['error' => 'Put not developed']);
+    $data = getRequestData();
+  
+
+        if (empty($data)) {
+            response(400, [
+                'success' => false,
+                'error' => 'noDataProvided'
+            ]);
+        return; 
+        }
+
+        $aulaId = $data['aula_id'] ?? null;
+
+        if (isset($data['color'])) {
+            $response = $db->updateAulaColor($aulaId ,$data['color']);
+
+            if($response){
+                response(200, [
+                    'success' => true,
+                    'message' => 'colorSuccessfulyUpdated'
+                ]);
+            }else{
+                response(200, [
+                    'success' => false,
+                    'error' => 'nameNotUpdated'
+                ]);
+            }
+        }
+
+        if (isset($data['aula_name'])) {
+            $nuevoNombre = $data['aula_name'];
+
+            // Comprobar si el nombre ya existe en otra aula
+            if ($db->aulaNameExists($nuevoNombre, $aulaId)) {
+                response(200, [
+                    "success" => false,
+                    "error" => "nameDup"
+                ]);
+            } else {
+                // Intentar actualizar
+                $actualizado = $db->updateAulaName($aulaId, $nuevoNombre);
+
+                if ($actualizado) {
+                    response(200, [
+                        'success' => true,
+                        'message' => 'aula_nameSuccessfullyUpdated'
+                    ]);
+                } else {
+                    response(200, [
+                        'success' => false,
+                        'error' => 'nameNotUpdated'
+                    ]);
+                }
+            }
+        }
+
+
+     
+
+        else{
+            response(400, [
+                'success' => false,
+                'error' => 'noDataProvided'
+            ]);
+        }
+        
+
 }
 
 /**
