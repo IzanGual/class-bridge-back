@@ -112,6 +112,22 @@ function handleGet($db) {
             return; 
         }
 
+        if (isset($_GET['studentAula_id'])) {
+            $courses = $db->getStudentCourses($_GET['studentAula_id'], $_GET['studentUser_id']);
+            if ($courses) {
+                response(200, [
+                    'success' => true,
+                    'courses' => $courses
+                ]);
+            } else {
+                response(200, [
+                    'success' => false,
+                    'error' => 'No se encontraron cursos para el aula'
+                ]);
+            }
+            return; 
+        }
+
 
         
         response(400, [

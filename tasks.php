@@ -48,9 +48,26 @@ function handleGet($db) {
     try {
         if (isset($_GET['accion'])) {
 
-            if ($_GET['accion'] == 'getUnDoneTasks') {
+            
+            if ($_GET['accion'] == 'getUnDeliveredTasks') {
 
-                $response = $db->getUnDoneTareas();
+                $response = $db->getUnDeliveredTasks($_GET['aula_id'], $_GET['user_id']);
+
+                if (!$response) {
+                    response(200, [
+                        'success' => false,
+                        'error' => 'Error al obtener las tareas en el servidor'
+                    ]);
+                } else {
+                    response(200, [
+                        'success' => true,
+                        'tasks' => $response
+                    ]);
+                }
+
+            }elseif ($_GET['accion'] == 'getUnDoneTasks') {
+
+                $response = $db->getUnDoneTareas($_GET['aula_id']);
 
                 if (!$response) {
                     response(200, [
@@ -91,7 +108,7 @@ function handleGet($db) {
 
             }elseif ($_GET['accion'] == 'getTasks') {
 
-                    $response = $db->getTasks();
+                    $response = $db->getTasks($_GET['aula_id']);
 
                 if (!$response) {
                     response(200, [

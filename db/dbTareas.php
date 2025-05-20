@@ -20,17 +20,12 @@ class dbTareas
 
 
 /**
- * Obtiene todas las entregas no entregadas desde la base de datos.
+ * Obtiene todas las tareas no entregadas y no corregidas de un aula específica.
  *
- * Este método ejecuta una consulta para recuperar todos los registros de la tabla
- * `entregas` cuya columna `estado` sea igual a 'noentregada' y los devuelve como un array asociativo.
- *
- * @return array|false Un array asociativo con todas las entregas no entregadas si la consulta es exitosa
- *                     (puede ser un array vacío si no hay ninguna),
- *                     o `false` en caso de error.
- * @throws PDOException Si ocurre un error durante la ejecución de la consulta.
+ * @param int $aula_id ID del aula para filtrar las tareas.
+ * @return array|false Un array asociativo con las tareas si la consulta tiene éxito, o false si falla.
  */
-public function getUnDoneTareas()
+public function getUnDoneTareas($aula_id)
 {
     try {
         $stmt = $this->pdo->prepare("
@@ -38,8 +33,12 @@ public function getUnDoneTareas()
             FROM entregas e
             JOIN usuarios u ON e.alumno_id = u.id
             JOIN tareas t ON e.tarea_id = t.id
-            WHERE e.estado = 'noentregada' AND e.estado_correccion = 'no_corregida'
+            JOIN cursos c ON t.curso_id = c.id
+            WHERE e.estado = 'noentregada'
+              AND e.estado_correccion = 'no_corregida'
+              AND c.aula_id = :aula_id
         ");
+        $stmt->bindParam(':aula_id', $aula_id, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -47,22 +46,60 @@ public function getUnDoneTareas()
     }
 }
 
+
 /**
- * Obtiene todas las tareas desde la base de datos.
+ * Obtiene las tareas no entregadas por un usuario en un aula específica.
  *
- * @return array|false Un array asociativo con todas las tareas (puede ser vacío),
- *                     o `false` en caso de error.
+ * @param int $aula_id ID del aula.
+ * @param int $user_id ID del usuario (alumno).
+ * @return array|false Lista de tareas no entregadas, o false en caso de error.
  */
-public function getTasks()
+public function getUnDeliveredTasks($aula_id, $user_id)
 {
     try {
-        $stmt = $this->pdo->prepare("SELECT * FROM tareas");
+        $stmt = $this->pdo->prepare("
+            SELECT e.*, t.nombre AS nombre_tarea, c.nombre AS nombre_curso
+            FROM entregas e
+            JOIN tareas t ON e.tarea_id = t.id
+            JOIN cursos c ON t.curso_id = c.id
+            WHERE e.estado = 'noentregada'
+              AND e.alumno_id = :user_id
+              AND c.aula_id = :aula_id
+        ");
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->bindParam(':aula_id', $aula_id, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         return false;
     }
 }
+
+
+/**
+ * Obtiene todas las tareas asociadas a un aula específica.
+ *
+ * @param int $aula_id ID del aula.
+ * @return array|false Un array asociativo con todas las tareas del aula (puede ser vacío),
+ *                     o `false` en caso de error.
+ */
+public function getTasks($aula_id)
+{
+    try {
+        $stmt = $this->pdo->prepare("
+            SELECT t.*, c.nombre AS nombre_curso
+            FROM tareas t
+            JOIN cursos c ON t.curso_id = c.id
+            WHERE c.aula_id = :aula_id
+        ");
+        $stmt->bindParam(':aula_id', $aula_id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
 
 
 
@@ -81,33 +118,64 @@ public function getTasks()
  * @param int $categoriaId El ID de la categoría de la tarea.
  * @return bool `true` si la tarea se insertó correctamente, `false` si ocurrió un error.
  */
+/**
+ * Inserta una nueva tarea en la base de datos y crea entregas no entregadas
+ * y no corregidas para todos los alumnos del curso correspondiente.
+ *
+ * @param string $nombreTarea El nombre de la tarea a insertar.
+ * @param string $fechaLimite La fecha límite para la tarea.
+ * @param int $cursoId El ID del curso al que pertenece la tarea.
+ * @param int $categoriaId El ID de la categoría de la tarea.
+ * @return bool `true` si todo se insertó correctamente, `false` si hubo error.
+ */
 public function insertTarea($nombreTarea, $fechaLimite, $cursoId, $categoriaId)
 {
     try {
-        // Preparar la consulta SQL para insertar los datos en la tabla tareas
+        // Iniciar transacción
+        $this->pdo->beginTransaction();
+
+        // 1. Insertar la tarea
         $sql = "INSERT INTO tareas (nombre, fecha_limite, curso_id, categoria_id) 
                 VALUES (:nombreTarea, :fechaLimite, :cursoId, :categoriaId)";
-        
-        // Preparar la sentencia SQL
         $stmt = $this->pdo->prepare($sql);
-        
-        // Asignar valores a los parámetros de la consulta SQL para evitar inyecciones
         $stmt->bindParam(':nombreTarea', $nombreTarea, PDO::PARAM_STR);
         $stmt->bindParam(':fechaLimite', $fechaLimite, PDO::PARAM_STR);
         $stmt->bindParam(':cursoId', $cursoId, PDO::PARAM_INT);
         $stmt->bindParam(':categoriaId', $categoriaId, PDO::PARAM_INT);
-        
-        // Ejecutar la consulta
         $stmt->execute();
-        
-        // Si la inserción fue exitosa, devolver true
+
+        // 2. Obtener el ID de la tarea recién insertada
+        $tareaId = $this->pdo->lastInsertId();
+
+        // 3. Obtener los alumnos del curso desde la tabla usuarios_cursos
+        $stmtAlumnos = $this->pdo->prepare("SELECT usuario_id FROM usuarios_cursos WHERE curso_id = :cursoId");
+        $stmtAlumnos->bindParam(':cursoId', $cursoId, PDO::PARAM_INT);
+        $stmtAlumnos->execute();
+        $alumnos = $stmtAlumnos->fetchAll(PDO::FETCH_COLUMN);
+
+        // 4. Insertar entregas para cada alumno
+        $stmtEntrega = $this->pdo->prepare("
+            INSERT INTO entregas (tarea_id, alumno_id, estado, estado_correccion) 
+            VALUES (:tareaId, :alumnoId, 'noentregada', 'no_corregida')
+        ");
+
+        foreach ($alumnos as $alumnoId) {
+            $stmtEntrega->bindParam(':tareaId', $tareaId, PDO::PARAM_INT);
+            $stmtEntrega->bindParam(':alumnoId', $alumnoId, PDO::PARAM_INT);
+            $stmtEntrega->execute();
+        }
+
+        // Confirmar la transacción
+        $this->pdo->commit();
         return true;
-        
+
     } catch (PDOException $e) {
-        // Si ocurre un error en la ejecución de la consulta, devolver false
+        // Revertir si algo falla
+        $this->pdo->rollBack();
         return false;
     }
 }
+
 /**
  * Actualiza el nombre y la fecha límite de una tarea existente en la base de datos.
  *

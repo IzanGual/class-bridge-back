@@ -123,21 +123,9 @@ public function getUsersByCourse_id($course_id)
 }
 
 
-/**
- * Actualiza la imagen de un curso en la base de datos.
- *
- * Este método permite cambiar la URL de la imagen de un curso en la base de datos 
- * usando su ID. Si la actualización es exitosa, devuelve `true`; si ocurre algún error, 
- * devuelve `false`.
- *
- * @param int $idCurso El ID del curso cuya imagen se actualizará.
- * @param string $imgUrl La nueva URL de la imagen del curso.
- *
- * @return bool `true` si la actualización fue exitosa, `false` en caso contrario.
- */
-public function uploadCourse($idCurso, $nombreCurso, $usuarios) {
+public function uploadCourse($idCurso, $nombreCurso, $usuarios)
+{
     try {
-        // Si los usuarios llegan como string separados por comas, convertir a array
         if (is_string($usuarios) && $usuarios !== 'noUsers') {
             $usuarios = explode(',', $usuarios);
         }
@@ -153,27 +141,71 @@ public function uploadCourse($idCurso, $nombreCurso, $usuarios) {
             ':id' => $idCurso
         ]);
 
-        // 2. Eliminar todas las relaciones anteriores
-        $queryDelete = "DELETE FROM usuarios_cursos WHERE curso_id = :curso_id";
-        $stmtDelete = $this->pdo->prepare($queryDelete);
+        // 2. Obtener lista anterior de usuarios del curso (antes de eliminar)
+        $stmtOldUsers = $this->pdo->prepare("SELECT usuario_id FROM usuarios_cursos WHERE curso_id = :curso_id");
+        $stmtOldUsers->execute([':curso_id' => $idCurso]);
+        $oldUsers = $stmtOldUsers->fetchAll(PDO::FETCH_COLUMN);
+
+        // 3. Eliminar relaciones actuales
+        $stmtDelete = $this->pdo->prepare("DELETE FROM usuarios_cursos WHERE curso_id = :curso_id");
         $stmtDelete->execute([':curso_id' => $idCurso]);
 
-        // 3. Insertar nuevas relaciones (si hay usuarios válidos)
+        // 4. Insertar nuevas relaciones
+        $newUsers = [];
         if (is_array($usuarios)) {
-            $queryInsert = "INSERT INTO usuarios_cursos (usuario_id, curso_id) VALUES (:usuario_id, :curso_id)";
-            $stmtInsert = $this->pdo->prepare($queryInsert);
-
+            $stmtInsert = $this->pdo->prepare("INSERT INTO usuarios_cursos (usuario_id, curso_id) VALUES (:usuario_id, :curso_id)");
             foreach ($usuarios as $usuarioId) {
                 if (is_numeric($usuarioId)) {
                     $stmtInsert->execute([
                         ':usuario_id' => $usuarioId,
                         ':curso_id' => $idCurso
                     ]);
+                    $newUsers[] = (int)$usuarioId;
                 }
             }
         }
 
-        // Confirmar cambios
+        // 5. Eliminar entregas de los antiguos alumnos que ya NO están
+        $usuariosQuitados = array_diff($oldUsers, $newUsers);
+        if (!empty($usuariosQuitados)) {
+            $in = implode(',', array_fill(0, count($usuariosQuitados), '?'));
+            $sqlDeleteEntregas = "
+                DELETE FROM entregas 
+                WHERE alumno_id IN ($in) 
+                AND tarea_id IN (SELECT id FROM tareas WHERE curso_id = ?)
+            ";
+            $stmtDelEntregas = $this->pdo->prepare($sqlDeleteEntregas);
+            $stmtDelEntregas->execute(array_merge($usuariosQuitados, [$idCurso]));
+        }
+
+        // 6. Obtener todas las tareas de este curso
+        $stmtTareas = $this->pdo->prepare("SELECT id FROM tareas WHERE curso_id = :curso_id");
+        $stmtTareas->execute([':curso_id' => $idCurso]);
+        $tareas = $stmtTareas->fetchAll(PDO::FETCH_COLUMN);
+
+        // 7. Insertar entregas nuevas para los nuevos usuarios si no existen
+        if (!empty($tareas) && !empty($newUsers)) {
+            $stmtCheck = $this->pdo->prepare("SELECT COUNT(*) FROM entregas WHERE tarea_id = ? AND alumno_id = ?");
+            $stmtInsertEntrega = $this->pdo->prepare("
+                INSERT INTO entregas (tarea_id, alumno_id, estado, estado_correccion)
+                VALUES (:tarea_id, :alumno_id, 'noentregada', 'no_corregida')
+            ");
+
+            foreach ($newUsers as $alumnoId) {
+                foreach ($tareas as $tareaId) {
+                    // Solo insertar si no existe ya
+                    $stmtCheck->execute([$tareaId, $alumnoId]);
+                    if ($stmtCheck->fetchColumn() == 0) {
+                        $stmtInsertEntrega->execute([
+                            ':tarea_id' => $tareaId,
+                            ':alumno_id' => $alumnoId
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // Confirmar todo
         $this->pdo->commit();
         return true;
 
@@ -183,6 +215,28 @@ public function uploadCourse($idCurso, $nombreCurso, $usuarios) {
     }
 }
 
+
+
+public function getStudentCourses($aulaId, $userId)
+{
+    try {
+        $sql = "
+            SELECT c.*
+            FROM cursos c
+            INNER JOIN usuarios_cursos uc ON c.id = uc.curso_id
+            WHERE c.aula_id = :aula_id AND uc.usuario_id = :user_id
+        ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':aula_id' => $aulaId,
+            ':user_id' => $userId
+        ]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+        return ['error' => 'dbError'];
+    }
+}
 
 
 /**

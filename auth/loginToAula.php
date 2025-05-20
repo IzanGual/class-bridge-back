@@ -81,7 +81,9 @@ function handleLogin($db) {
                     response(200, [
                         'success' => true,
                         'message' => 'isStudent',
-                        'token' => $jwt
+                        'token' => $jwt,
+                        'userName' => $user['nombre']
+
                     ]);
                 }
             } else {
