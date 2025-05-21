@@ -221,7 +221,15 @@ public function getStudentCourses($aulaId, $userId)
 {
     try {
         $sql = "
-            SELECT c.*
+            SELECT 
+                c.*, 
+                (
+                    SELECT nombre 
+                    FROM apartados 
+                    WHERE apartados.curso_id = c.id 
+                    ORDER BY id ASC 
+                    LIMIT 1
+                ) AS nombre_apartado
             FROM cursos c
             INNER JOIN usuarios_cursos uc ON c.id = uc.curso_id
             WHERE c.aula_id = :aula_id AND uc.usuario_id = :user_id
@@ -237,6 +245,7 @@ public function getStudentCourses($aulaId, $userId)
         return ['error' => 'dbError'];
     }
 }
+
 
 
 /**

@@ -49,7 +49,25 @@ function handleGet($db) {
     try {
         if (isset($_GET['accion'])) {
 
-            if ($_GET['accion'] == 'getEntregas') {
+            if ($_GET['accion'] == 'getOwnEntregaByTareaId') {
+
+                $usuario_id = getUserIdFromToken();
+                $tarea_id = $_GET['tarea_id'] ?? null;
+
+                $response = $db->getEntrega($usuario_id, $tarea_id);
+                if ($response === false) {
+                    response(200, [
+                        'success' => false,
+                        'error' => 'Error al obtener las entregas en el servidor'
+                    ]);
+                } else {
+                    response(200, [
+                        'success' => true,
+                        'entrega' => $response
+                    ]);
+                }
+
+            }elseif ($_GET['accion'] == 'getEntregas') {
 
                 $usuario_id = $_GET['usuario_id'] ?? null;
                 $tarea_id = $_GET['tarea_id'] ?? null;
@@ -103,14 +121,28 @@ function handleGet($db) {
 
 
 /**
- * Manejo de solicitudes POST
+ * Manejo de solicitudes POST 
  */
 function handlePost($db) {
-   
-        $data = getRequestData();
-        
-     
-    
+    if (!isset($_POST['accion'])) {
+        response(400, ["success" => false, "error" => "Debes proporcionar la acción"]);
+        return;
+    }
+
+    $accion = $_POST['accion'];
+
+    if ($accion === 'entregarEntrega') {
+        if (isset($_FILES['file'])) {
+            $fileUrl = handleEntregarEntrega($db);
+        }else{
+            response(200, ['success' => false, 'error' => 'Falta el archivo']);
+        }
+    }else{
+            response(200, ['success' => false, 'error' => 'Accion invalido']);
+
+    }
+
+
 }
 
 
@@ -189,15 +221,17 @@ function handleDelete($db) {
         response(200, ['error' => 'Falta accion']);
     }
 
-    if($_GET["accion"] == "deleteTask"){
-        $taskId = intval($_GET['id']);
+    if($_GET["accion"] == "deleteEntrega"){
 
-        $taskDeleted = $db->deleteTask($taskId);
-            if ($taskDeleted) {
-                response(200, ['success' => true, 'message' => 'Documento eliminado correctamente.']);
-            } else {
-                response(200, ['success' => false, 'error' => 'Error al eliminar el documento de la BD.']);
-            }
+            $etregaId = intval($_GET['id']);
+
+                    $entregaDeleted = $db->deleteEntrega($etregaId);
+                        if ($entregaDeleted) {
+                            response(200, ['success' => true, 'message' => 'Entrega eliminada correctamente.']);
+                        } else {
+                            response(200, ['success' => false, 'error' => 'Error al eliminar la entrega de la BD.']);
+                        }
+
 
     }else{
         response(200, ['success' => false, 'error' => 'No se ha espicificado accion']);
@@ -229,3 +263,76 @@ function response($statusCode, $data) {
     echo json_encode($data);
     exit;
 }
+
+   /**
+ * Manejo de la subida de arhcivos
+ */
+function handleEntregarEntrega($db) {
+    if (
+        !isset($_FILES['file']) ||
+        !isset($_POST['entregaId']) ||
+        !isset($_POST['fecha'])
+    ) {
+        response(200, ['success' => false, 'error' => 'Faltan parámetros obligatorios.']);
+    }
+
+    $entregaID = $_POST['entregaId'];
+    $fechaEntrega = $_POST['fecha'];
+
+    $fechaEntrega = $_POST['fecha'];
+
+    // Convertir la fecha al formato correcto para MySQL
+    $fechaObj = DateTime::createFromFormat('d/m/Y', $fechaEntrega);
+    $fechaFormateada = $fechaObj ? $fechaObj->format('Y-m-d') : null;
+    
+
+    // Obtener información de la entrega desde la base de datos
+    $entregaInfo = $db->getEntregaInfo($entregaID); // Debe devolver courseId, apartadoId, categoriaId
+
+    if (!$entregaInfo) {
+        response(200, ['success' => false, 'error' => 'Entrega no encontrada.']);
+    }
+
+    $courseId = $entregaInfo['course_id'];
+    $apartadoId = $entregaInfo['apartado_id'];
+    $categoriaId = $entregaInfo['categoria_id'];
+
+    // Obtener la extensión original del archivo
+    $extension = strtolower(pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION));
+
+    // Validar tamaño (máx. 10 MB)
+    if ($_FILES["file"]["size"] > 10 * 1024 * 1024) {
+        response(200, ['success' => false, 'error' => 'Archivo demasiado grande. Máx. 10MB.']);
+    }
+
+    // Ruta destino
+    $relativePath = "uploads/courses/$courseId/apartados/$apartadoId/categorias/$categoriaId/entregas/$entregaID/";
+    $absolutePath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/" . $relativePath;
+
+    // Crear la carpeta si no existe
+    if (!is_dir($absolutePath)) {
+        mkdir($absolutePath, 0777, true);
+    }
+
+    // Nombre del archivo (único si quieres evitar sobreescribir)
+    $fileName = uniqid("entrega_") . '.' . $extension;
+    $fullPath = $absolutePath . $fileName;
+
+    if (!move_uploaded_file($_FILES["file"]["tmp_name"], $fullPath)) {
+        response(200, ['success' => false, 'error' => 'No se pudo mover el archivo.']);
+    }
+
+    // URL pública
+    $ip_servidor = gethostbyname(gethostname());
+    $publicUrl = "http://$ip_servidor/classbridgeapi/" . ltrim($relativePath, "/") . $fileName;
+
+    // Actualizar entrega en la base de datos (debes implementar este método en tu clase $db)
+    $updateSuccess = $db->registrarEntrega($entregaID, $publicUrl, $fechaFormateada);
+
+    if ($updateSuccess) {
+        response(200, ['success' => true, 'message' => 'Entrega realizada correctamente.', 'url' => $publicUrl]);
+    } else {
+        response(200, ['success' => false, 'error' => 'Error al registrar la entrega en la base de datos.']);
+    }
+}
+
