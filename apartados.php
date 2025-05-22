@@ -17,7 +17,7 @@ $db = new dbApartados();
 
 $method = $_SERVER['REQUEST_METHOD'];
 if (!validateToken()) {
-    response(200, [
+    response(401, [
         'success' => false,
         'error' => 'invalidToken'
     ]);

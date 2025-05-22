@@ -77,7 +77,7 @@ public function insertAula($nombre, $profesor_id)
         $stmt->bindParam(':profesor_id', $profesor_id, PDO::PARAM_INT);
         
         if ($stmt->execute()) {
-            return true;
+            return (int) $this->pdo->lastInsertId();
         } else {
             return ['error' => 'insertError']; // No se pudo insertar
         }
@@ -103,6 +103,8 @@ public function deleteAulaByProfesor($profesor_id)
             $stmt->bindParam(':profesor_id', $profesor_id, PDO::PARAM_INT);
             return $stmt->execute();
         } catch (PDOException $e) {
+                    //echo "Error al eliminar aula: " . $e->getMessage();
+
             return false;
         }
 }

@@ -73,22 +73,22 @@ function validateUserToken() {
         ]);
 
     } catch (ExpiredException $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "tokenExpired"
         ]);
     } catch (BeforeValidException $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "tokenNotYetValid"
         ]);
     } catch (SignatureInvalidException $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "invalidTokenSignature"
         ]);
     } catch (Exception $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "invalidToken"
         ]);
@@ -142,22 +142,22 @@ function validateTeacherToken() {
         }
 
     } catch (ExpiredException $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "tokenExpired"
         ]);
     } catch (BeforeValidException $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "tokenNotYetValid"
         ]);
     } catch (SignatureInvalidException $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "invalidTokenSignature"
         ]);
     } catch (Exception $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "invalidToken"
         ]);
@@ -174,7 +174,7 @@ function validateStudentToken() {
 
     // Verificar si hay un token en la solicitud
     if (!$jwt) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "missingToken"
         ]);
@@ -194,29 +194,29 @@ function validateStudentToken() {
 
             
         } else {
-            response(200, [
+            response(401, [
                 "success" => false,
                 "error" => "invalidRole"
             ]);
         }
 
     } catch (ExpiredException $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "tokenExpired"
         ]);
     } catch (BeforeValidException $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "tokenNotYetValid"
         ]);
     } catch (SignatureInvalidException $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "invalidTokenSignature"
         ]);
     } catch (Exception $e) {
-        response(200, [
+        response(401, [
             "success" => false,
             "error" => "invalidToken"
         ]);

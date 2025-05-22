@@ -623,44 +623,175 @@ public function updateUserPass($idUsuario, $pass)
 
 
 /**
- * Elimina el perfil de un usuario de la base de datos.
+ * Elimina el perfil de un usuario. Si el usuario es profesor, también elimina todos los usuarios con el mismo aulaId y el aula.
+ * Si no es profesor, solo elimina su fila.
  *
- * Este método elimina un usuario específico de la base de datos mediante su ID. Primero verifica si
- * el usuario existe en la base de datos. Si el usuario existe, procede a eliminarlo. Si la eliminación
- * es exitosa, devuelve `true`. Si no se encuentra el usuario o ocurre algún error, devuelve un mensaje
- * de error.
- *
- * @param int $userId El ID del usuario cuyo perfil se eliminará.
+ * @param int $userId El ID del usuario cuyo perfil y aula (si aplica) se eliminarán.
  *
  * @return mixed `true` si la eliminación fue exitosa, un arreglo con un mensaje de error en caso contrario.
  */
-
 public function deleteUserProfile($userId) 
 {
-        try {
-            // Verificamos si el usuario existe
-            $checkStmt = $this->pdo->prepare("SELECT id FROM usuarios WHERE id = :id");
-            $checkStmt->execute([':id' => $userId]);
-            $existingUser = $checkStmt->fetch();
-    
-            if (!$existingUser) {
-                return ['error' => 'userNotFound'];
-            }
-    
-            // Eliminamos el usuario
-            $stmt = $this->pdo->prepare("DELETE FROM usuarios WHERE id = :id");
-            $success = $stmt->execute([':id' => $userId]);
-    
-            if ($success) {
-                return true;
-            } else {
-                return ['error' => 'deleteFailed'];
-            }
-    
-        } catch (PDOException $e) {
-            return ['error' => 'Error deleting user: ' . $e->getMessage()];
+    try {
+        // Paso 1: Obtener datos del usuario
+        $stmt = $this->pdo->prepare("SELECT aulaId, tipo FROM usuarios WHERE id = :id");
+        $stmt->execute([':id' => $userId]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            return ['error' => 'userNotFound'];
         }
+
+        $aulaId = $user['aulaId'];
+        $tipo = $user['tipo'];
+
+        // Si es profesor, eliminar todo el aula y su contenido
+        if ($tipo === 'profesor') {
+            $this->pdo->beginTransaction();
+
+            // Paso 2: Obtener usuarios del aula
+            $stmt = $this->pdo->prepare("SELECT id FROM usuarios WHERE aulaId = :aulaId");
+            $stmt->execute([':aulaId' => $aulaId]);
+            $usuarios = $stmt->fetchAll();
+
+            // Paso 3: Eliminar carpetas de perfil de cada usuario
+            foreach ($usuarios as $u) {
+                $perfilPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/profiles/" . $u['id'];
+                if (is_dir($perfilPath)) {
+                    $this->deleteDirectoryContents($perfilPath);
+                    rmdir($perfilPath);
+                }
+            }
+
+            // Paso 4: Obtener cursos del aula
+            $stmt = $this->pdo->prepare("SELECT id FROM cursos WHERE aula_id = :aulaId");
+            $stmt->execute([':aulaId' => $aulaId]);
+            $cursos = $stmt->fetchAll();
+
+            // Paso 5: Eliminar cada curso (uso de tu función deleteCourse)
+            foreach ($cursos as $curso) {
+                $this->deleteCourse($curso['id']);
+            }
+
+            // Paso 6: Eliminar usuarios del aula
+            $stmt = $this->pdo->prepare("DELETE FROM usuarios WHERE aulaId = :aulaId");
+            $stmt->execute([':aulaId' => $aulaId]);
+
+            // Paso 7: Eliminar el aula
+            $stmt = $this->pdo->prepare("DELETE FROM aulas WHERE id = :aulaId");
+            $stmt->execute([':aulaId' => $aulaId]);
+
+            $this->pdo->commit();
+            return true;
+
+        } else {
+            // Si no es profesor, solo eliminar al usuario y su carpeta de perfil
+            $perfilPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/profiles/" . $userId;
+            if (is_dir($perfilPath)) {
+                $this->deleteDirectoryContents($perfilPath);
+                rmdir($perfilPath);
+            }
+
+            $stmt = $this->pdo->prepare("DELETE FROM usuarios WHERE id = :id");
+            $stmt->execute([':id' => $userId]);
+
+            return true;
+        }
+
+    } catch (PDOException $e) {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+        return ['error' => 'Error deleting: ' . $e->getMessage()];
+    }
 }
+
+
+
+/**
+ * Elimina un curso y todo su contenido asociado (archivos en la carpeta de uploads).
+ *
+ * @param int $courseId El ID del curso a eliminar.
+ * @return bool True si el curso se eliminó correctamente, false en caso contrario.
+ */
+public function deleteCourse($courseId) 
+{
+    $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/" . $courseId;
+
+    $this->pdo->beginTransaction();
+
+    try {
+        // Eliminar tareas relacionadas con las categorías de este curso
+        $query = "DELETE FROM tareas 
+                  WHERE categoria_id IN (
+                      SELECT id FROM categorias WHERE curso_id = :courseId
+                  )";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':courseId' => $courseId]);
+
+        // Eliminar categorías relacionadas con este curso
+        $query = "DELETE FROM categorias WHERE curso_id = :courseId";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':courseId' => $courseId]);
+
+        // Eliminar archivos y carpeta del curso
+        if (is_dir($courseFolderPath)) {
+            $this->deleteDirectoryContents($courseFolderPath);
+            rmdir($courseFolderPath);
+        }
+
+        // Eliminar el curso de la base de datos
+        $query = "DELETE FROM cursos WHERE id = :id";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute([':id' => $courseId]);
+
+        $this->pdo->commit();
+        return true;
+
+    } catch (PDOException $e) {
+        $this->pdo->rollBack();
+        echo "Error al eliminar el curso: " . $e->getMessage();
+        return false;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Elimina todos los archivos dentro de un directorio y luego el directorio.
+ *
+ * @param string $dir Ruta del directorio a eliminar.
+ * @return void
+ */
+private function deleteDirectoryContents($dir)
+{
+    if (!is_dir($dir)) return;
+
+    $items = scandir($dir);
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') continue;
+
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+
+        if (is_dir($path)) {
+            $this->deleteDirectoryContents($path); // Recursivo
+            rmdir($path); // Elimina subcarpeta vacía
+        } else {
+            unlink($path); // Elimina archivo
+        }
+    }
+}
+
+
     
 
 
@@ -675,32 +806,28 @@ public function deleteUserProfile($userId)
  *
  * @return mixed `true` si la actualización fue exitosa, un arreglo con un mensaje de error en caso contrario.
  */
-public function updateUserRoleToTeacher($idUsuario) 
+public function updateUserRoleToTeacher($idUsuario, $aulaId) 
 {
-        try {
-            // Definir los valores fijos
-            $Rol = "profesor";
-            $estadoSuscripcion = "activo";
-    
-            // Consulta SQL para actualizar el rol y estado de suscripción
-            $query = "UPDATE usuarios SET tipo = :tipo, estado_suscripcion = :estado WHERE id = :id";
-            
-            // Preparamos la consulta
-            $stmt = $this->pdo->prepare($query);
-    
-            // Ejecutamos la consulta con los valores proporcionados
-            $success = $stmt->execute([
-                ':tipo' => $Rol,
-                ':estado' => $estadoSuscripcion,
-                ':id' => $idUsuario
-            ]);
-    
-            return $success; // Devuelve true si la actualización fue exitosa
-    
-        } catch (PDOException $e) {
-            return ['error' => 'Error al actualizar el rol: ' . $e->getMessage()];
-        }
+    try {
+        $Rol = "profesor";
+        $estadoSuscripcion = "activo";
+
+        $query = "UPDATE usuarios SET tipo = :tipo, estado_suscripcion = :estado, aulaId = :aulaId WHERE id = :id";
+        $stmt = $this->pdo->prepare($query);
+
+        $success = $stmt->execute([
+            ':tipo' => $Rol,
+            ':estado' => $estadoSuscripcion,
+            ':aulaId' => $aulaId,
+            ':id' => $idUsuario
+        ]);
+
+        return $success;
+    } catch (PDOException $e) {
+        return ['error' => 'Error al actualizar el rol: ' . $e->getMessage()];
+    }
 }
+
 
 
 
@@ -717,30 +844,25 @@ public function updateUserRoleToTeacher($idUsuario)
  */
 public function degradeUserRoleToCanceled($idUsuario) 
 {
-        try {
-            // Definir los valores fijos
-            $Rol = "normal";
-            $estadoSuscripcion = "cancelado";
-    
-            // Consulta SQL para actualizar el rol y estado de suscripción
-            $query = "UPDATE usuarios SET tipo = :tipo, estado_suscripcion = :estado WHERE id = :id";
-            
-            // Preparamos la consulta
-            $stmt = $this->pdo->prepare($query);
-    
-            // Ejecutamos la consulta con los valores proporcionados
-            $success = $stmt->execute([
-                ':tipo' => $Rol,
-                ':estado' => $estadoSuscripcion,
-                ':id' => $idUsuario
-            ]);
-    
-            return $success; // Devuelve true si la actualización fue exitosa
-    
-        } catch (PDOException $e) {
-            return ['error' => 'Error al actualizar el rol: ' . $e->getMessage()];
-        }
+    try {
+        $Rol = "normal";
+        $estadoSuscripcion = "cancelado";
+
+        $query = "UPDATE usuarios SET tipo = :tipo, estado_suscripcion = :estado, aulaId = NULL WHERE id = :id";
+        $stmt = $this->pdo->prepare($query);
+
+        $success = $stmt->execute([
+            ':tipo' => $Rol,
+            ':estado' => $estadoSuscripcion,
+            ':id' => $idUsuario
+        ]);
+
+        return $success;
+    } catch (PDOException $e) {
+        return ['error' => 'Error al degradar el rol: ' . $e->getMessage()];
+    }
 }
+
 
 
 /**

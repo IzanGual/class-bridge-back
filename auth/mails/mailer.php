@@ -48,7 +48,7 @@ if (!validateToken()) {
             break;
 
         case 'sendInfoMail':
-            sendInfoMail();
+            sendInfoMail($data['aula_name']);
             break;
         
         default:
@@ -64,15 +64,13 @@ if (!validateToken()) {
  * Utiliza PHPMailer para la configuración SMTP y envía, utilizamos brevo como SMTP.
  * un email HTML personalizado con los datos del usuario y el aula.
  */
-function sendInfoMail() {
+function sendInfoMail($aulaName) {
     $dbAulas = new dbAulas();
     $db = new dbUsuarios();
     $userMail = "";
     
     $id_usuario = getUserIdFromToken(); // Obtener el ID del usuario de la solicitud utilizando jwtHelper
     $userInfo = $db->getUserById($id_usuario);
-    $aula = $dbAulas->getAulaById($id_usuario);
-    $aulaName = $aula['nombre'];
     $ipServer = gethostbyname(gethostname()); // Obtener la IP del servidor
     $AulaUrl = "http://$ipServer:3000/bridgeto/" . $aulaName; // URL del aula
 

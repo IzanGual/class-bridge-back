@@ -23,7 +23,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':  
         if (!validateToken()) {
-            response(200, [
+            response(401, [
                 'success' => false,
                 'error' => 'invalidToken'
             ]);
@@ -36,7 +36,7 @@ switch ($method) {
         break;
     case 'PUT':
         if (!validateToken()) {
-            response(200, [
+            response(401, [
                 'success' => false,
                 'error' => 'invalidToken'
             ]);
@@ -46,7 +46,7 @@ switch ($method) {
         break;
     case 'DELETE':
         if (!validateToken()) {
-            response(200, [
+            response(401, [
                 'success' => false,
                 'error' => 'invalidToken'
             ]);
@@ -73,7 +73,7 @@ function handleGet($db) {
                     'user' => $user
                 ]);
             } else {
-                response(404, [
+                response(200, [
                     'success' => false,
                     'error' => 'Usuario no encontrado'
                 ]);
@@ -90,7 +90,7 @@ function handleGet($db) {
                     'users' => $users
                 ]);
             } else {
-                response(404, [
+                response(200, [
                     'success' => false,
                     'error' => 'No se encontraron usuarios en el aula'
                 ]);
@@ -193,6 +193,8 @@ function handlePut($db) {
         if (isset($data['precio']) && isset($data['classroomName'])) {
             $dbAulas = new dbAulas();
             $dbPagos = new dbPagos();
+
+          
         
             $response = $dbAulas->insertAula($data['classroomName'], $userId);
         
@@ -202,7 +204,9 @@ function handlePut($db) {
                     'error' => $response['error']
                 ]);
             } else {
-                $response = $db->updateUserRoleToTeacher($userId);
+
+                $aulaId = $response;
+                $response = $db->updateUserRoleToTeacher($userId, $aulaId);
         
                 if (is_array($response) && isset($response['error'])) {
                     response(200, [
