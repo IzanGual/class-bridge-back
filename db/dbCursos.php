@@ -277,6 +277,14 @@ public function createCourse($nombreCurso, $usuarios, $aulaId) {
 
         $cursoId = $this->pdo->lastInsertId();
 
+        // Crear carpeta para el curso
+        $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/" . $cursoId;
+        if (!is_dir($courseFolderPath)) {
+            if (!mkdir($courseFolderPath, 0755, true)) {
+                throw new Exception("No se pudo crear la carpeta del curso en: $courseFolderPath");
+            }
+        }
+
         // Insertar usuarios
         if (is_array($usuarios)) {
             $queryUsuarios = "INSERT INTO usuarios_cursos (usuario_id, curso_id) VALUES (:usuario_id, :curso_id)";
@@ -294,8 +302,9 @@ public function createCourse($nombreCurso, $usuarios, $aulaId) {
         $this->pdo->commit();
         return $cursoId;
 
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         $this->pdo->rollBack();
+        echo "Error al crear el curso: " . $e->getMessage();
         return false;
     }
 }
