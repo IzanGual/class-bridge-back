@@ -118,6 +118,10 @@ public function deleteAulaByProfesor($profesor_id)
 
         $stmtDeleteUsuario = $this->pdo->prepare("DELETE FROM usuarios WHERE id = :id");
         foreach ($usuarios as $usuarioId) {
+            
+            $stmtDeleteUsuario->execute([':id' => $usuarioId]);
+            
+            $rutaUser = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/profiles/$usuarioId";
             $stmtDeleteUsuario->execute([':id' => $usuarioId]);
         }
 

@@ -670,7 +670,8 @@ public function deleteUserProfile($userId)
 
             // Paso 5: Eliminar cada curso (uso de tu función deleteCourse)
             foreach ($cursos as $curso) {
-                $this->deleteCourse($curso['id']);
+                $this->deleteCourse($curso['id'], true); // ✅ ya estás en una transacción
+
             }
 
             // Paso 6: Eliminar usuarios del aula
@@ -702,6 +703,7 @@ public function deleteUserProfile($userId)
         if ($this->pdo->inTransaction()) {
             $this->pdo->rollBack();
         }
+       // echo "Error al eliminar el curso: " . $e->getMessage();
         return ['error' => 'Error deleting: ' . $e->getMessage()];
     }
 }
@@ -714,11 +716,13 @@ public function deleteUserProfile($userId)
  * @param int $courseId El ID del curso a eliminar.
  * @return bool True si el curso se eliminó correctamente, false en caso contrario.
  */
-public function deleteCourse($courseId) 
+public function deleteCourse($courseId, $enTransaccion = false) 
 {
     $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/" . $courseId;
 
-    $this->pdo->beginTransaction();
+    if (!$enTransaccion) {
+        $this->pdo->beginTransaction();
+    }
 
     try {
         // Eliminar tareas relacionadas con las categorías de este curso
@@ -745,22 +749,20 @@ public function deleteCourse($courseId)
         $stmt = $this->pdo->prepare($query);
         $stmt->execute([':id' => $courseId]);
 
-        $this->pdo->commit();
+        if (!$enTransaccion) {
+            $this->pdo->commit();
+        }
+
         return true;
 
     } catch (PDOException $e) {
-        $this->pdo->rollBack();
-        echo "Error al eliminar el curso: " . $e->getMessage();
+        if (!$enTransaccion && $this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+        //error_log("Error al eliminar el curso $courseId: " . $e->getMessage());
         return false;
     }
 }
-
-
-
-
-
-
-
 
 
 
