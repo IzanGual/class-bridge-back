@@ -49,7 +49,24 @@ function handleGet($db) {
     try {
         if (isset($_GET['accion'])) {
 
-            if ($_GET['accion'] == 'getOwnEntregaByTareaId') {
+            if ($_GET['accion'] == 'getOwnEntregas') {
+
+                $aula_id = $_GET['aula_id'] ?? null;
+
+                $response = $db->getEntregasByAula($aula_id);
+                if ($response === false) {
+                    response(200, [
+                        'success' => false,
+                        'error' => 'Error al obtener las entregas en el servidor'
+                    ]);
+                } else {
+                    response(200, [
+                        'success' => true,
+                        'entregas' => $response
+                    ]);
+                }
+
+            }elseif ($_GET['accion'] == 'getOwnEntregaByTareaId') {
 
                 $usuario_id = getUserIdFromToken();
                 $tarea_id = $_GET['tarea_id'] ?? null;

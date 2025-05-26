@@ -99,6 +99,47 @@ public function getEntrega($alumno_id, $tarea_id)
     }
 }
 
+/**
+ * Obtiene todas las entregas asociadas a un aula concreta,
+ * siguiendo la relación entregas → tareas → cursos → aulas.
+ *
+ * @param int $aula_id ID del aula
+ * @return array|false Lista de entregas o false si hay error
+ */
+public function getEntregasByAula($aula_id)
+{
+    try {
+        $sql = "
+            SELECT 
+                e.*,
+                u.nombre AS nombre_alumno,
+                t.nombre AS nombre_tarea,
+                t.fecha_limite AS fecha_limite_tarea,
+                c.nombre AS nombre_curso,
+                a.nombre AS nombre_aula
+            FROM entregas e
+            JOIN usuarios u ON e.alumno_id = u.id
+            JOIN tareas t ON e.tarea_id = t.id
+            JOIN cursos c ON t.curso_id = c.id
+            JOIN aulas a ON c.aula_id = a.id
+            WHERE a.id = :aula_id
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':aula_id' => $aula_id
+        ]);
+
+        $entregas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $entregas ?: [];
+
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+
 
 /**
  * Obtiene una entrega específica por su ID.

@@ -129,6 +129,28 @@ public function registerStudent($nombre, $email, $pass, $cursos, $aula_id)
             ]);
         }
 
+        // === Crear entregas iniciales ===
+        if (!empty($cursos)) {
+            $in = implode(',', array_fill(0, count($cursos), '?'));
+            $sqlTareas = "SELECT id FROM tareas WHERE curso_id IN ($in)";
+            $stmtTareas = $this->pdo->prepare($sqlTareas);
+            $stmtTareas->execute($cursos);
+            $tareas = $stmtTareas->fetchAll(PDO::FETCH_COLUMN);
+
+            if (!empty($tareas)) {
+                $stmtInsertEntrega = $this->pdo->prepare("
+                    INSERT INTO entregas (tarea_id, alumno_id, estado, estado_correccion)
+                    VALUES (:tarea_id, :alumno_id, 'noentregada', 'no_corregida')
+                ");
+                foreach ($tareas as $tareaId) {
+                    $stmtInsertEntrega->execute([
+                        ':tarea_id' => $tareaId,
+                        ':alumno_id' => $usuario_id
+                    ]);
+                }
+            }
+        }
+
         // Confirmar la transacción
         $this->pdo->commit();
 

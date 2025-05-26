@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require 'db/dbAulas.php';
+require 'auth/jwtHelper.php'; 
 
 $db = new dbAulas();
 
@@ -22,13 +23,34 @@ switch ($method) {
         handleGet($db);
         break;
     case 'POST':
-        handlePost($db);
+        if (!validateToken()) {
+            response(401, [
+                'success' => false,
+                'error' => 'invalidToken'
+            ]);
+        } else {
+            handlePost($db);
+        }
         break;
     case 'PUT':
-        handlePut($db);
+        if (!validateToken()) {
+            response(401, [
+                'success' => false,
+                'error' => 'invalidToken'
+            ]);
+        } else {
+            handlePut($db);
+        }
         break;
     case 'DELETE':
-        handleDelete($db);
+        if (!validateToken()) {
+            response(401, [
+                'success' => false,
+                'error' => 'invalidToken'
+            ]);
+        } else {
+           handledDelete($db);
+        }
         break;
     default:
         response(405, ['error' => 'Método no permitido']);
