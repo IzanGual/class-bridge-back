@@ -678,7 +678,7 @@ public function deleteUserProfile($userId)
 
             // Paso 3: Eliminar carpetas de perfil de cada usuario
             foreach ($usuarios as $u) {
-                $perfilPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/profiles/" . $u['id'];
+                $perfilPath = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/profiles/" . $u['id'];
                 if (is_dir($perfilPath)) {
                     $this->deleteDirectoryContents($perfilPath);
                     rmdir($perfilPath);
@@ -709,7 +709,7 @@ public function deleteUserProfile($userId)
 
         } else {
             // Si no es profesor, solo eliminar al usuario y su carpeta de perfil
-            $perfilPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/profiles/" . $userId;
+            $perfilPath = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/profiles/" . $userId;
             if (is_dir($perfilPath)) {
                 $this->deleteDirectoryContents($perfilPath);
                 rmdir($perfilPath);
@@ -740,7 +740,7 @@ public function deleteUserProfile($userId)
  */
 public function deleteCourse($courseId, $enTransaccion = false) 
 {
-    $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/" . $courseId;
+    $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/courses/" . $courseId;
 
     if (!$enTransaccion) {
         $this->pdo->beginTransaction();
@@ -905,7 +905,7 @@ public function updateIgmgURLWithRealIP()
             $ipServidor = gethostbyname(gethostname());
     
             // Nueva URL con la IP del servidor
-            $nuevaImgUrl = "http://$ipServidor/classbridgeapi/uploads/profiles/000/profile.png";
+            $nuevaImgUrl = "https://classbridge.es/api/uploads/profiles/000/profile.png";
     
             // Consulta para actualizar todos los usuarios
             $query = "UPDATE usuarios SET img_url = :nueva_url";

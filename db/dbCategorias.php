@@ -107,7 +107,7 @@ public function deleteCategoria($idCategoria)
             $apartadoId = $categoria['apartado_id'];
 
             // Ruta actualizada que incluye el apartado
-            $categoriaFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/$courseId/apartados/$apartadoId/categorias/$idCategoria";
+            $categoriaFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/courses/$courseId/apartados/$apartadoId/categorias/$idCategoria";
 
             if (is_dir($categoriaFolderPath)) {
                 $this->deleteDirectoryContents($categoriaFolderPath);

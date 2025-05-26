@@ -198,7 +198,7 @@ function handleFileUpload($db) {
 
     // Construir la ruta destino
     $relativePath = "uploads/courses/$courseId/apartados/$apartadoId/categorias/$categoriaId/documentos/";
-    $absolutePath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/" . $relativePath;
+    $absolutePath = $_SERVER['DOCUMENT_ROOT'] . "/api/" . $relativePath;
 
     // Crear la carpeta si no existe
     if (!is_dir($absolutePath)) {
@@ -216,7 +216,7 @@ function handleFileUpload($db) {
 
     // URL pública del archivo
     $ip_servidor = gethostbyname(gethostname());
-    $publicUrl = "http://$ip_servidor/classbridgeapi/" . $relativePath . $fileName;
+    $publicUrl = "https://classbridge.es/api/" . $relativePath . $fileName;
 
     // Guardar en la base de datos
     $insertSuccess = $db->createDocumento($categoriaId, $nombreDocumento, $publicUrl);
@@ -240,7 +240,7 @@ function handleFileUpdate($db, $docName) {
     }
 
     $oldUrl = $doc['url'];
-    $oldFullPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/" . str_replace("/classbridgeapi/", "", parse_url($oldUrl, PHP_URL_PATH));
+    $oldFullPath = $_SERVER['DOCUMENT_ROOT'] . "/api/" . str_replace("/api/", "", parse_url($oldUrl, PHP_URL_PATH));
     $folderPath = dirname($oldFullPath);
 
     $ip_servidor = gethostbyname(gethostname());
@@ -279,8 +279,8 @@ function handleFileUpdate($db, $docName) {
     }
 
     // Nueva URL pública
-    $newRelativePath = str_replace($_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/", "", $newFullPath);
-    $newPublicUrl = "http://$ip_servidor/classbridgeapi/" . $newRelativePath;
+    $newRelativePath = str_replace($_SERVER['DOCUMENT_ROOT'] . "/api/", "", $newFullPath);
+    $newPublicUrl = "https://classbridge.es/api/" . $newRelativePath;
 
     // Actualizar base de datos
     $updateSuccess = $db->updateDocumento($Id, $docName, $newPublicUrl);
@@ -297,7 +297,7 @@ function handleFileUpdate($db, $docName) {
 function handleBannerDeletion($db, $courseId) {
     // Definir la URL de la imagen predeterminada
     $ip_servidor = gethostbyname(gethostname());
-    $defaultImageUrl = "http://$ip_servidor/classbridgeapi/uploads/courses/000/banner.png";
+    $defaultImageUrl = "https://classbridge.es/api/uploads/courses/000/banner.png";
 
     // Obtener la URL de la imagen desde la BD
     $imageUrl = $db->getCourseBanner($courseId);
@@ -315,7 +315,7 @@ function handleBannerDeletion($db, $courseId) {
     }
 
     // Convertir la URL a una ruta de archivo eliminando la parte del dominio
-    $filePath = str_replace("http://$ip_servidor/classbridgeapi/", "", $imageUrl);
+    $filePath = str_replace("https://classbridge.es/api/", "", $imageUrl);
 
 
     // Eliminar la imagen del servidor si existe

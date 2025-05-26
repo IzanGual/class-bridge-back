@@ -179,9 +179,9 @@ public function deleteDocumento($documentoId)
     }
 
     $url = $documento['url'];
-    $urlPath = parse_url($url, PHP_URL_PATH); // /classbridgeapi/uploads/...
-    $relativePath = str_replace("/classbridgeapi/", "", $urlPath); // uploads/...
-    $fullPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/" . $relativePath;
+    $urlPath = parse_url($url, PHP_URL_PATH); 
+    $relativePath = str_replace("/api/", "", $urlPath); // uploads/...
+    $fullPath = $_SERVER['DOCUMENT_ROOT'] . "/api/" . $relativePath;
 
     // Paso 2: Eliminar el archivo si existe
     if (file_exists($fullPath)) {

@@ -272,7 +272,7 @@ public function deleteEntrega($entregaId)
         }
 
         // 2. Borrar archivos y carpeta
-        $entregaPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/{$entrega['curso_id']}/apartados/{$entrega['apartado_id']}/categorias/{$entrega['categoria_id']}/entregas/{$entrega['entrega_id']}";
+        $entregaPath = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/courses/{$entrega['curso_id']}/apartados/{$entrega['apartado_id']}/categorias/{$entrega['categoria_id']}/entregas/{$entrega['entrega_id']}";
         if (is_dir($entregaPath)) {
             $this->deleteDirectoryContents($entregaPath);
             rmdir($entregaPath); // eliminar carpeta vacía

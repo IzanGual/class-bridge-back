@@ -271,7 +271,7 @@ public function deleteTask($idTarea)
             $entregaId = $entrega['entrega_id'];
 
             if ($entregaId) {
-                $entregaPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/$courseId/apartados/$apartadoId/categorias/$categoriaId/entregas/$entregaId";
+                $entregaPath = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/courses/$courseId/apartados/$apartadoId/categorias/$categoriaId/entregas/$entregaId";
                 if (is_dir($entregaPath)) {
                     $this->deleteDirectoryContents($entregaPath);
                     rmdir($entregaPath);

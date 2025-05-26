@@ -100,7 +100,7 @@ public function deleteApartado($idApartado)
 
         if ($curso) {
             $courseId = $curso['curso_id'];
-            $apartadoFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/$courseId/apartados/$idApartado";
+            $apartadoFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/courses/$courseId/apartados/$idApartado";
 
             if (is_dir($apartadoFolderPath)) {
                 $this->deleteDirectoryContents($apartadoFolderPath);

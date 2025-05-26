@@ -324,7 +324,7 @@ function handleEntregarEntrega($db) {
 
     // Ruta destino
     $relativePath = "uploads/courses/$courseId/apartados/$apartadoId/categorias/$categoriaId/entregas/$entregaID/";
-    $absolutePath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/" . $relativePath;
+    $absolutePath = $_SERVER['DOCUMENT_ROOT'] . "/api/" . $relativePath;
 
     // Crear la carpeta si no existe
     if (!is_dir($absolutePath)) {
@@ -341,7 +341,7 @@ function handleEntregarEntrega($db) {
 
     // URL pública
     $ip_servidor = gethostbyname(gethostname());
-    $publicUrl = "http://$ip_servidor/classbridgeapi/" . ltrim($relativePath, "/") . $fileName;
+    $publicUrl = "https://classbridge.es/api/" . ltrim($relativePath, "/") . $fileName;
 
     // Actualizar entrega en la base de datos (debes implementar este método en tu clase $db)
     $updateSuccess = $db->registrarEntrega($entregaID, $publicUrl, $fechaFormateada);

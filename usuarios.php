@@ -411,7 +411,7 @@ function handleImageUpload($db) {
     if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $filePath)) {
         // Generar la URL pública de la imagen
         $ip_servidor = gethostbyname(gethostname());
-        $imageUrl = "http://$ip_servidor/classbridgeapi/" . $filePath;
+        $imageUrl = "https://classbridge.es/api/" . $filePath;
 
         // Guardar la URL en la base de datos
         $response = $db->updateUserImage($userId, $imageUrl);
@@ -431,7 +431,7 @@ function handleImageUpload($db) {
 function handleImageDeletion($db, $userId) {
     // Definir la URL de la imagen predeterminada
     $ip_servidor = gethostbyname(gethostname());
-    $defaultImageUrl = "http://$ip_servidor/classbridgeapi/uploads/profiles/000/profile.png";
+    $defaultImageUrl = "https://classbridge.es/api/uploads/profiles/000/profile.png";
 
     // Obtener la URL de la imagen desde la BD
     $imageUrl = $db->getUserImage($userId);
@@ -449,7 +449,7 @@ function handleImageDeletion($db, $userId) {
     }
 
     // Convertir la URL a una ruta de archivo eliminando la parte del dominio
-    $filePath = str_replace("http://$ip_servidor/classbridgeapi/", "", $imageUrl);
+    $filePath = str_replace("https://classbridge.es/api/", "", $imageUrl);
 
 
     // Eliminar la imagen del servidor si existe

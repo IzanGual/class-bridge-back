@@ -37,7 +37,7 @@ public function updateIgmgURLWithRealIP()
             $ipServidor = gethostbyname(gethostname());
     
             // Nueva URL con la IP del servidor
-            $nuevaImgUrl = "http://$ipServidor/classbridgeapi/uploads/courses/000/banner.png";
+            $nuevaImgUrl = "https://classbridge.es/api/uploads/courses/000/banner.png";
     
             // Consulta para actualizar todos los usuarios
             $query = "UPDATE cursos SET img_url = :nueva_url";
@@ -278,7 +278,7 @@ public function createCourse($nombreCurso, $usuarios, $aulaId) {
         $cursoId = $this->pdo->lastInsertId();
 
         // Crear carpeta para el curso
-        $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/" . $cursoId;
+        $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/courses/" . $cursoId;
         if (!is_dir($courseFolderPath)) {
             if (!mkdir($courseFolderPath, 0755, true)) {
                 throw new Exception("No se pudo crear la carpeta del curso en: $courseFolderPath");
@@ -385,7 +385,7 @@ public function getCourseBanner($id)
  */
 public function deleteCourse($courseId) 
 {
-    $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/" . $courseId;
+    $courseFolderPath = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/courses/" . $courseId;
 
     $this->pdo->beginTransaction();
 

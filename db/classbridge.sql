@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-05-2025 a las 16:06:36
+-- Tiempo de generación: 26-05-2025 a las 21:38:56
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -46,38 +46,6 @@ CREATE TABLE `aulas` (
   `color` varchar(20) DEFAULT '247, 128, 98'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `aulas`
---
-
-INSERT INTO `aulas` (`id`, `nombre`, `profesor_id`, `color`) VALUES
-(1, 'Matemáticas Avanzadas', 1, '247, 128, 98'),
-(2, 'Historia Universal', 2, '247, 128, 98'),
-(26, 'caca', 19, '247, 128, 98'),
-(27, 'izanguma10', 20, '247, 128, 98'),
-(31, 'eliroad', 24, '247, 128, 98');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `calendario`
---
-
-CREATE TABLE `calendario` (
-  `id` int(11) NOT NULL,
-  `profesor_id` int(11) NOT NULL,
-  `alumno_id` int(11) NOT NULL,
-  `curso_id` int(11) NOT NULL,
-  `fecha` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `calendario`
---
-
-INSERT INTO `calendario` (`id`, `profesor_id`, `alumno_id`, `curso_id`, `fecha`) VALUES
-(1, 1, 3, 1, '2024-06-10 10:00:00');
-
 -- --------------------------------------------------------
 
 --
@@ -104,14 +72,6 @@ CREATE TABLE `codigos_verificacion` (
   `expiracion` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `codigos_verificacion`
---
-
-INSERT INTO `codigos_verificacion` (`id_usuario`, `codigo_verificacion`, `expiracion`) VALUES
-(7, '638968', '2025-05-15 21:40:31'),
-(18, '148043', '2025-05-14 09:37:23');
-
 -- --------------------------------------------------------
 
 --
@@ -122,15 +82,8 @@ CREATE TABLE `cursos` (
   `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `aula_id` int(11) NOT NULL,
-  `img_url` varchar(255) DEFAULT 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png'
+  `img_url` varchar(255) DEFAULT 'https://classbridge.es/api/uploads/courses/000/banner.png'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `cursos`
---
-
-INSERT INTO `cursos` (`id`, `nombre`, `aula_id`, `img_url`) VALUES
-(1, 'Álgebra y Cálculo', 1, 'http://192.168.1.130/classbridgeapi/uploads/courses/000/banner.png');
 
 -- --------------------------------------------------------
 
@@ -177,17 +130,6 @@ CREATE TABLE `pagos` (
   `estado` enum('completado','pendiente','fallido') DEFAULT 'pendiente'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `pagos`
---
-
-INSERT INTO `pagos` (`id`, `usuario_id`, `monto`, `metodo_pago`, `estado`) VALUES
-(1, 1, 49.99, 'Tarjeta de Crédito', 'completado'),
-(2, 2, 49.99, 'PayPal', 'completado'),
-(36, 19, 29.99, 'Tarjeta de credito', 'completado'),
-(37, 20, 29.99, 'Tarjeta de credito', 'completado'),
-(41, 24, 29.99, 'Tarjeta de credito', 'completado');
-
 -- --------------------------------------------------------
 
 --
@@ -207,9 +149,7 @@ CREATE TABLE `planes_servicio` (
 --
 
 INSERT INTO `planes_servicio` (`id`, `nombre`, `descripcion`, `beneficios`, `precio`) VALUES
-(1, 'Plan Básico', 'Plan de acceso limitado con funcionalidades básicas.', 'Acceso a funciones básicas, soporte técnico básico, sin funcionalidades avanzadas.', 9.99),
-(2, 'Plan Premium', 'Plan con acceso completo a todas las funcionalidades avanzadas.', 'Acceso a todas las funciones, soporte técnico prioritario, funcionalidades avanzadas.', 29.99),
-(3, 'Plan Empresarial', 'Plan pensado para empresas, con funciones adicionales y soporte dedicado.', 'Acceso completo, soporte personalizado, funcionalidades avanzadas para empresas, informes detallados.', 49.99);
+(1, 'class-plan', 'Acceso a todas las funcionalidades de class-bridge, creación y gestión de tu aula virtual.', 'Gratuito para siempre;Gestión de cursos dentro de tu aula;Gestión de usuarios;Gestión de permisos;Acceso a guali;Personalización de tu aula;Actualización de cursos en tiempo real', 0.00);
 
 -- --------------------------------------------------------
 
@@ -238,22 +178,9 @@ CREATE TABLE `usuarios` (
   `pass` varchar(255) NOT NULL,
   `tipo` enum('profesor','alumno','normal') NOT NULL,
   `estado_suscripcion` enum('activo','pendiente','cancelado') DEFAULT 'pendiente',
-  `img_url` varchar(255) DEFAULT 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png',
+  `img_url` varchar(255) DEFAULT 'https://classbridge.es/api/uploads/profiles/000/profile.png',
   `aulaId` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `usuarios`
---
-
-INSERT INTO `usuarios` (`id`, `nombre`, `email`, `pass`, `tipo`, `estado_suscripcion`, `img_url`, `aulaId`) VALUES
-(1, 'Juan Pérez', 'juanperez@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'profesor', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', NULL),
-(2, 'María López', 'marialopez@example.com', 'e10adc3949ba59abbe56e057f20f883e', 'profesor', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', NULL),
-(3, 'Carlos García', 'c@gmail.com', '$2y$10$h0hPw4cwPJX9u9toJMsy4u6EkanLynWGJ/0SXbJacj9DqwuXhAQAy', 'profesor', 'activo', 'http://192.168.1.130/classbridgeapi/uploads/profiles/000/profile.png', 1),
-(18, 'Marta', 'marta@gmail.com', '$2y$10$AYmye0vNuQtPcG12ZCYn0OMfLl.HloBEyv7Ls1j0M6TFwDlkATGMa', 'normal', 'pendiente', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png', NULL),
-(19, 'Lucas', 'lucas@gmail.com', '$2y$10$AX2wJC6NgfkArqPj8J.IZOIAMhB.FYsHq9X/iaQy0swdi9JeE1C.i', 'profesor', 'activo', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png', NULL),
-(20, 'izanhuma', 'izanguma10@gmail.com', '$2y$10$vKOv4ujXL0zTY2cfFBA.ROKCWeRQhOBPUqlkoXR25CKkCnV5feeO6', 'profesor', 'activo', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png', NULL),
-(24, 'izan', 'iesvda.izamar@gmail.com', '$2y$10$L0DaAaS0uEIWxw/qPeWJIOPRXLr.iqg22bZDH4zO7.1vvsLzqqK4y', 'profesor', 'activo', 'http://localhost/classbridgeapi/uploads/profiles/000/profile.png', 31);
 
 -- --------------------------------------------------------
 
@@ -266,13 +193,6 @@ CREATE TABLE `usuarios_cursos` (
   `usuario_id` int(11) NOT NULL,
   `curso_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `usuarios_cursos`
---
-
-INSERT INTO `usuarios_cursos` (`id`, `usuario_id`, `curso_id`) VALUES
-(1, 3, 1);
 
 --
 -- Índices para tablas volcadas
@@ -292,15 +212,6 @@ ALTER TABLE `aulas`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `nombre` (`nombre`),
   ADD KEY `profesor_id` (`profesor_id`);
-
---
--- Indices de la tabla `calendario`
---
-ALTER TABLE `calendario`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `profesor_id` (`profesor_id`),
-  ADD KEY `alumno_id` (`alumno_id`),
-  ADD KEY `curso_id` (`curso_id`);
 
 --
 -- Indices de la tabla `categorias`
@@ -384,73 +295,67 @@ ALTER TABLE `usuarios_cursos`
 -- AUTO_INCREMENT de la tabla `apartados`
 --
 ALTER TABLE `apartados`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- AUTO_INCREMENT de la tabla `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
-
---
--- AUTO_INCREMENT de la tabla `calendario`
---
-ALTER TABLE `calendario`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- AUTO_INCREMENT de la tabla `cursos`
 --
 ALTER TABLE `cursos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- AUTO_INCREMENT de la tabla `documentos`
 --
 ALTER TABLE `documentos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- AUTO_INCREMENT de la tabla `entregas`
 --
 ALTER TABLE `entregas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- AUTO_INCREMENT de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- AUTO_INCREMENT de la tabla `planes_servicio`
 --
 ALTER TABLE `planes_servicio`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- AUTO_INCREMENT de la tabla `tareas`
 --
 ALTER TABLE `tareas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios_cursos`
 --
 ALTER TABLE `usuarios_cursos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=265;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 --
 -- Restricciones para tablas volcadas
@@ -467,14 +372,6 @@ ALTER TABLE `apartados`
 --
 ALTER TABLE `aulas`
   ADD CONSTRAINT `aulas_ibfk_1` FOREIGN KEY (`profesor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `calendario`
---
-ALTER TABLE `calendario`
-  ADD CONSTRAINT `calendario_ibfk_1` FOREIGN KEY (`profesor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `calendario_ibfk_2` FOREIGN KEY (`alumno_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `calendario_ibfk_3` FOREIGN KEY (`curso_id`) REFERENCES `cursos` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `categorias`
@@ -521,7 +418,7 @@ ALTER TABLE `tareas`
 -- Filtros para la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD CONSTRAINT `fk_aula` FOREIGN KEY (`aulaId`) REFERENCES `aulas` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_aula` FOREIGN KEY (`aulaId`) REFERENCES `aulas` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `usuarios_cursos`

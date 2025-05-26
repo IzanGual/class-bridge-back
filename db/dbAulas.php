@@ -121,7 +121,7 @@ public function deleteAulaByProfesor($profesor_id)
             
             $stmtDeleteUsuario->execute([':id' => $usuarioId]);
             
-            $rutaUser = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/profiles/$usuarioId";
+            $rutaUser = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/profiles/$usuarioId";
             $stmtDeleteUsuario->execute([':id' => $usuarioId]);
         }
 
@@ -131,7 +131,7 @@ public function deleteAulaByProfesor($profesor_id)
         $cursos = $stmtCursos->fetchAll(PDO::FETCH_COLUMN);
 
         foreach ($cursos as $cursoId) {
-            $ruta = $_SERVER['DOCUMENT_ROOT'] . "/classBridgeAPI/uploads/courses/$cursoId";
+            $ruta = $_SERVER['DOCUMENT_ROOT'] . "/api/uploads/courses/$cursoId";
             $this->deleteDirectory($ruta);
         }
 
