@@ -258,25 +258,39 @@ public function authenticateUserClass($aulaID, $email)
  */
 public function getUserById($id) 
 {
-        // Consulta para obtener los detalles del usuario por ID
-        $query = "SELECT id, nombre, email, tipo, estado_suscripcion, img_url FROM usuarios WHERE id = :id";
-        
-        // Preparamos y ejecutamos la consulta con el ID proporcionado
-        $stmt = $this->pdo->prepare($query);
-        $stmt->execute([':id' => $id]);
-        
-        // Obtenemos el usuario de la base de datos
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Verificamos si encontramos el usuario
-        if ($user) {
-            return $user; // Retornamos los datos del usuario
-        }
-        
-        // Si no encontramos el usuario, retornamos false
-        return false;
+    // Consulta para obtener los detalles del usuario y el nombre del aula
+    $query = "
+        SELECT 
+            u.id, 
+            u.nombre, 
+            u.email, 
+            u.tipo, 
+            u.estado_suscripcion, 
+            u.img_url, 
+            a.nombre AS nombre_aula
+        FROM 
+            usuarios u
+        LEFT JOIN 
+            aulas a ON u.aulaId = a.id
+        WHERE 
+            u.id = :id
+    ";
+    
+    // Preparamos y ejecutamos la consulta con el ID proporcionado
+    $stmt = $this->pdo->prepare($query);
+    $stmt->execute([':id' => $id]);
+    
+    // Obtenemos el usuario de la base de datos
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Verificamos si encontramos el usuario
+    if ($user) {
+        return $user; // Retornamos los datos del usuario
+    }
+    
+    // Si no encontramos el usuario, retornamos false
+    return false;
 }
-
 
 
 /**

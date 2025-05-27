@@ -72,7 +72,7 @@ function sendInfoMail($aulaName) {
     $id_usuario = getUserIdFromToken(); // Obtener el ID del usuario de la solicitud utilizando jwtHelper
     $userInfo = $db->getUserById($id_usuario);
     $ipServer = gethostbyname(gethostname()); // Obtener la IP del servidor
-    $AulaUrl = "http://$ipServer:3000/bridgeto/" . $aulaName; // URL del aula
+    $AulaUrl = "https://classbridge.es/bridgeto/" . $aulaName; // URL del aula
 
     if (!$userInfo) {
         response(200, ['error' => 'Error al obtener los datos del usuario.']);
